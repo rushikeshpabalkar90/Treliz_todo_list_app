@@ -1,0 +1,1268 @@
+{% include 'header.html' %}
+
+<body>
+<nav class="navbar navbar-expand-lg navbar-light fixed-top bg-light">
+    <div class="container-fluid">
+        <a class="navbar-brand ms-lg-5 ms-md-3 ms-sm-1" href="#"><img src="/static/assets/images/logo.png" alt=""></a>
+        <button type="button" class="navbar-toggler btn btn-outline-secondary dropdown-btn workspaces-btn"
+                data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                aria-expanded="false" aria-label="Toggle navigation">
+            More
+            <img class="dropdown-down-icon" src="/static/assets/svg-vector/dropdown_down.svg"
+                 alt="workspace tab">
+        </button>
+        {#        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"#}
+        {#                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">#}
+        {#            <span class="navbar-toggler-icon"></span>#}
+        {#        </button>#}
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mb-2 mb-lg-0">
+                <li class="nav-item dropdown">
+                    <button type="button" class="btn btn-outline-secondary dropdown-btn workspaces-btn"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        Workspaces
+                        <img class="dropdown-down-icon" src="/static/assets/svg-vector/dropdown_down.svg"
+                             alt="workspace tab">
+                    </button>
+                    <ul id="workspace-dropdown-menu" aria-labelledby="dropdownMenu"
+                        class="shadow mb-2 bg-white rounded dropdown-menu">
+                        <li>
+                            <div class="workspace-dropdown">
+                                {% for workspace in all_workspaces %}
+                                    {% if workspace.workspace_id == current_workspace_id and workspace.workspace_id != 1 %}
+                                        <p>Current Workspace</p>
+                                        <a href="#" class="btn btn-outline-secondary btn-dropdown">
+                                            <div style="background: {{ workspace.workspace_logo_color }}"
+                                                 class="workspace-logo-accordion">{{ workspace.workspace_name[0].title() }}</div>
+                                            {{ workspace.workspace_name }}
+                                        </a>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        </li>
+                        {% if current_workspace_id %}
+                            <li>
+                                <hr>
+                            </li>
+                        {% endif %}
+
+                        <li><p>Your Workspaces</p></li>
+
+                        {% for workspace in all_workspaces %}
+                            {% if workspace.workspace_id != 1 %}
+                                <li>
+                                    <div class="workspace-dropdown">
+                                        <a href="#" class="btn btn-outline-secondary btn-dropdown">
+                                            <div style="background: {{ workspace.workspace_logo_color }}"
+                                                 class="workspace-logo-accordion">{{ workspace.workspace_name[0].title() }}</div>
+                                            {{ workspace.workspace_name }}
+                                        </a>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+
+                    </ul>
+
+                </li>
+                <li class="nav-item dropdown">
+                    <button type="button" class="btn btn-outline-secondary dropdown-btn"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        Recent
+                        <img class="dropdown-down-icon" src="/static/assets/svg-vector/dropdown_down.svg"
+                             alt="workspace tab">
+                    </button>
+
+                    <ul id="recent-dropdown-menu" aria-labelledby="dropdownMenuClickable"
+                        class="shadow mb-2 bg-white rounded dropdown-menu">
+                        {% for board in all_boards_recent %}
+                            {% if not board.is_template %}
+                                <li>
+                                    <div class="recent-dropdown">
+                                        <a href="{{ url_for('board', board_id=board.board_id) }}"
+                                           class="btn btn-outline-secondary btn-dropdown">
+                                            <div class="row">
+                                                <div class="project-img-column">
+                                                    <img class="workspace-logo" src="{{ board.board_background_image }}"
+                                                         alt="workspace-icon">
+                                                </div>
+                                                <div class="project-details-column">
+                                                    <p class="project_name_dropdown">{{ board.board_name }}</p>
+                                                    {% for workspace in all_workspaces %}
+                                                        {% if board.parent_workspace_id == workspace.workspace_id %}
+                                                            <p class="workspace_name_dropdown">{{ workspace.workspace_name }}</p>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </div>
+                                </li>
+                            {% endif %}
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li class="nav-item dropdown">
+                    <button type="button" class="btn btn-outline-secondary dropdown-btn"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                        Templates
+                        <img class="dropdown-down-icon" src="/static/assets/svg-vector/dropdown_down.svg"
+                             alt="workspace tab">
+                    </button>
+
+
+                    <ul id="recent-dropdown-menu" aria-labelledby="dropdownMenuClickable"
+                        class="shadow mb-2 bg-white rounded dropdown-menu">
+                        <li><h6>Free Templates</h6></li>
+
+                        {% for template in all_templates %}
+                            <li>
+                                <div class="recent-dropdown">
+                                    <a href="{{ url_for('board', board_id=template.board_id) }}"
+                                       class="btn btn-outline-secondary btn-dropdown">
+                                        <div class="row">
+                                            <div class="project-img-column">
+                                                <img class="workspace-logo" src="{{ template.board_background_image }}"
+                                                     alt="workspace-icon">
+                                            </div>
+                                            <div class="project-details-column">
+                                                <p class="project_name_dropdown">{{ template.board_name }}</p>
+                                                <p class="workspace_name_dropdown">Template</p>
+                                            </div>
+                                        </div>
+                                    </a>
+                                </div>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </li>
+
+
+            </ul>
+            <div class="me-auto nav-item dropdown">
+                {% if not ((user.id == 1 and all_workspaces[1:] == []) or all_workspaces == []) %}
+                    <button type="button" class="btn btn-primary new-board-btn mx-3" data-bs-auto-close="outside"
+                            data-bs-toggle="dropdown" aria-expanded="false">Create Board
+                    </button>
+                {% else %}
+                    <button style="width:115px; border:none; background: transparent;"></button>
+
+                {% endif %}
+
+                <ul id="create-board-dropdown-menu" aria-labelledby="dropdownMenuClickable"
+                    class="shadow mb-5 bg-white rounded dropdown-menu">
+
+                    <li><p class="create-board-title">Create board</p></li>
+                    <li>
+                        <div class="background-img-display">
+                            <img id="board-bg-display" src="/static/assets/svg-vector/placeholder_board_bg.svg"
+                                 alt="">
+                        </div>
+                    </li>
+                    <li><p class="create-board-backgrounds">Background</p></li>
+                    <li>
+                        <form class="create-board-form" action="{{ url_for('boards_manager') }}" method="post"
+                              enctype="multipart/form-data">
+                            <div class="flex-img-parent">
+                                {% for bg_img in all_images[:4] %}
+                                    <input required type="radio" class="board-bg-img" name="boardBackgroundOption"
+                                           id="imgRadio{{ all_images.index(bg_img) }}"
+                                           value="{{ bg_img }}">
+                                    <label class="display-selector" for="imgRadio{{ all_images.index(bg_img) }}"
+                                           style="background-image:url('{{ bg_img }}');">
+                                    </label>
+                                {% endfor %}
+
+                            </div>
+                            <div class="flex-color-parent">
+                                {% for bg_color in all_colors[:6] %}
+                                    <input required type="radio" class="board-bg-color" name="boardBackgroundOption"
+                                           id="colorRadio{{ all_colors.index(bg_color) }}"
+                                           value="/static/assets/images/board_background_img/bg_colors/{{ bg_color }}">
+                                    <label class="display-selector" for="colorRadio{{ all_colors.index(bg_color) }}"
+                                           style="background-image:
+                                                   url('/static/assets/images/board_background_img/bg_colors/{{ bg_color }}');">
+                                    </label>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="mb-2">
+                                <label for="exampleInputEmail" class="form-label">Board title</label>
+                                <input required maxlength="11" type="text" name="Board_Name" class="form-control"
+                                       id="exampleInputEmail" placeholder="Board name">
+                            </div>
+
+                            {% if (user.id == 1 and all_workspaces[1:]|count > 1) or all_workspaces|count > 1 %}
+                                <div class="mb-2">
+                                    <label for="workspace-selector" class="form-label">Workspace</label>
+                                    <select id="workspace-selector" name="Board_Workspace" class="form-select"
+                                            aria-label="Default select example">
+                                        {% if user.id == 1 %}
+                                            <option value="{{ all_workspaces[1].workspace_id }}"
+                                                    selected>{{ all_workspaces[1].workspace_name }}</option>
+                                            {% for workspace in all_workspaces[2:] %}
+                                                <option value="{{ workspace.workspace_id }}">{{ workspace.workspace_name }}</option>
+                                            {% endfor %}
+                                        {% else %}
+                                            <option value="{{ all_workspaces[0].workspace_id }}"
+                                                    selected>{{ all_workspaces[0].workspace_name }}</option>
+                                            {% for workspace in all_workspaces[1:] %}
+                                                <option value="{{ workspace.workspace_id }}">{{ workspace.workspace_name }}</option>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+                                </div>
+
+                            {% endif %}
+
+                            <div class="mb-3">
+
+                                <label for="browsers" class="form-label">Visibility</label>
+                                <select id="browsers" name="Board_Visibility" class="form-select"
+                                        aria-label="Default select example">
+                                    <option selected>Workspace</option>
+                                    <option value="Private">Private</option>
+                                    <option value="Public">Public</option>
+                                </select>
+                            </div>
+
+                            <div id="signup-btn">
+                                <button name="create-board" type="submit" class="btn btn-primary">Create</button>
+                            </div>
+
+                        </form>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+
+        <div class="ms-auto d-flex">
+            <div class="nav-item">
+                <input type="search" placeholder="Search" class="form-control"
+                       style="background-image: url('/static/assets/svg-vector/search-icon.png'); width: 14.375rem; padding-left: 1.875rem; margin: 0 0.9375rem; background-repeat: no-repeat; background-position: left center;">
+            </div>
+            <div class="nav-item dropstart dropdown">
+                <a href="#" class="btn-dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+
+                    <img class="notification-icon" src="/static/assets/svg-vector/notification_bell.svg"
+                         alt="notification">
+                </a>
+                <ul id="notification-dropdown-menu" aria-labelledby="dropdownMenuClickable"
+                    class="shadow mb-5 bg-white dropdown-menu">
+                    <li>
+                        <p class="notification_title">Notifications</p>
+                    </li>
+                    <li>
+                        <div class="notification-hr">
+                            <hr>
+                        </div>
+                    </li>
+                    <li>
+                        <p class="no-notification">No notification</p>
+                    </li>
+
+                    {#                        <li>#}
+                    {##}
+                    {#                            <div class="shadow-sm rounded" id="notification-tile">#}
+                    {#                                <div class="row">#}
+                    {#                                    <div class="notification-img">#}
+                    {#                                        <img src="/static/assets/svg-vector/user.svg" alt="user-icon">#}
+                    {#                                    </div>#}
+                    {#                                    <div class="notification-heading">#}
+                    {#                                        <p class="notification-tile-head">Trello Workspace</p>#}
+                    {#                                    </div>#}
+                    {#                                </div>#}
+                    {#                                <p class="notification-timing">Aug 11, 2024 4:35 PM</p>#}
+                    {##}
+                    {##}
+                    {#                                <div class="notification-msg-tile">#}
+                    {#                                    <div class="row">#}
+                    {#                                        <div class="notification-account-logo">#}
+                    {#                                            <div class="account-logo" style="background-color: orange"><p>R</p></div>#}
+                    {#                                        </div>#}
+                    {##}
+                    {#                                        <div class="notification-account-name">#}
+                    {#                                            <p class="notification-ac-name">Rushikesh Pabalkar</p>#}
+                    {#                                        </div>#}
+                    {#                                    </div>#}
+                    {##}
+                    {#                                    <p class="notification-msg">Lorem ipsum dolor sit amet, consecrate adipiscing elit,#}
+                    {#                                        sed diam#}
+                    {#                                        nonhuman nib Lorem ipsum dolor sit amet, consecrate adipiscing elit, sed diam#}
+                    {#                                        nonhuman nib#}
+                    {#                                    </p>#}
+                    {#                                </div>#}
+                    {##}
+                    {#                            </div>#}
+                    {##}
+                    {#                        </li>#}
+
+                </ul>
+            </div>
+            <div class="nav-item">
+                <a style="background: {{ user.user_logo_color }}" class="user-avatar" data-bs-toggle="offcanvas"
+                   href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+                    {{ user.user_name[0].title() }}
+                </a>
+            </div>
+        </div>
+
+    </div>
+</nav>
+
+<div class="offcanvas offcanvas-end account-panel" tabindex="-1" id="offcanvasExample"
+     aria-labelledby="offcanvasExampleLabel">
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="offcanvasExampleLabel">ACCOUNT</h5>
+
+    </div>
+    <div class="offcanvas-body">
+        <ul class="account-panel-content" aria-labelledby="dropdownMenuClickable">
+            <li>
+                <a href="#">
+                    <div class="row account-panel-info">
+
+                        <div class="column1-account-logo">
+                            <div style="background: {{ user.user_logo_color }}"
+                                 class="account-avatar">{{ user.user_name[0].title() }}</div>
+                        </div>
+
+                        <div class="column2-account-details">
+                            <h3 class="account-name">{{ user.user_name }}</h3>
+                            <p class="account-email">{{ user.user_email }}</p>
+                        </div>
+
+                    </div>
+                </a>
+            </li>
+            <li><a class="account-panel-element" href="#">Switch accounts</a></li>
+            <li><p><a class="account-panel-element" href="#">Manage accounts
+                <img class="manage-account-icon" src="/static/assets/svg-vector/redirect.svg"
+                     alt="redirect-icon"></a></p>
+            </li>
+
+            <li>
+                <hr>
+            </li>
+            <li><p class="account-panel-Treliz">TRELIZ</p></li>
+            <li><a class="account-panel-element" href="#">Profile and visibility</a></li>
+            <li><a class="account-panel-element" href="#">Cards</a></li>
+            <li><a class="account-panel-element" href="#">Settings</a></li>
+            <li><a class="account-panel-element" href="#">Theme</a></li>
+            <li>
+                <hr>
+            </li>
+            <li>
+                <a data-bs-toggle="offcanvas" href="#create_workspace" role="button"
+                   aria-controls="create_workspace" class="account-panel-element">
+                    <img class="workspace-logo" src="/static/assets/svg-vector/workspace.svg"
+                         alt="workspace-icon">
+                    Create Workspace
+                </a>
+            </li>
+            <li>
+                <hr>
+            </li>
+            <li>
+                <a class="account-panel-element" href="{{ url_for('logout_page') }}">Logout</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="offcanvas offcanvas-top create-workspace" tabindex="-1" id="create_workspace"
+     aria-labelledby="create_workspaceLabel">
+    <div class="offcanvas-body">
+        <ul class="create-workspace-content" aria-labelledby="dropdownMenuClickable">
+            <li><p class="create-workspace-heading">Let's build a Workspace</p></li>
+            <li>
+                <p class="create-workspace-subheading">
+                    Boost your productivity by making it easier for everyone to access boards in one
+                    location.
+                </p>
+            </li>
+            <li>
+                <form class="create-workspace-form" action="{{ url_for('boards_manager') }}"
+                      method="post"
+                      enctype="multipart/form-data">
+
+                    <div class="mb-3">
+                        <label for="exampleInputEmail" class="form-label">Workspace Name</label>
+                        <input name="Workspace_Name" required maxlength="20"
+                               placeholder="Treliz Co."
+                               title="no symbols allowed | max-length 20 characters." type="text"
+                               class="form-control" id="exampleInputEmail">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Workspace description</label>
+                        <textarea style="resize: none;" name="Workspace_Description"
+                                  maxlength="250."
+                                  class="form-control" id="description" rows="5"
+                                  placeholder="our team organizes everything here..."></textarea>
+                        <p style="font-size: 12px;">Maximum length 250 characters.</p>
+                    </div>
+
+                    <div id="signup-btn">
+                        <button type="submit" name="create-workspace" class="btn btn-primary"
+                                data-bs-dismiss="offcanvas" aria-label="Close">Create Workspace
+                        </button>
+                    </div>
+
+                </form>
+            </li>
+        </ul>
+        <img class="create-workspace-bg" src="/static/assets/svg-vector/create-workspace-bg.svg"
+             alt="">
+        <button type="button" class="btn-close text-reset close-btn" data-bs-dismiss="offcanvas"
+                aria-label="Close"></button>
+
+    </div>
+
+</div>
+
+{% if (user.id == 1 and all_workspaces[1:] == []) or all_workspaces == [] %}
+
+    <div class="offcanvas offcanvas-top create-workspace show" tabindex="-1" id="create_workspace"
+         aria-labelledby="create_workspaceLabel">
+        <div class="offcanvas-body">
+            <ul class="create-workspace-content" aria-labelledby="dropdownMenuClickable">
+                <li><p class="create-workspace-heading">Let's build a Workspace</p></li>
+                <li>
+                    <p class="create-workspace-subheading">
+                        Boost your productivity by making it easier for everyone to access boards in one location.
+                    </p>
+                </li>
+                <li>
+                    <form class="create-workspace-form" action="{{ url_for('boards_manager') }}" method="post"
+                          enctype="multipart/form-data">
+
+                        <div class="mb-3">
+                            <label for="exampleInputEmail" class="form-label">Workspace Name</label>
+                            <input name="Workspace_Name" required maxlength="20" class="form-control"
+                                   id="exampleInputEmail" placeholder="Treliz Co."
+                                   title="no symbols allowed | max-length 20 characters." type="text">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Workspace description</label>
+                            <textarea style="resize: none;" name="Workspace_Description" maxlength="250." rows="5"
+                                      class="form-control" id="description"
+                                      placeholder="our team organizes everything here..."></textarea>
+                            <p style="font-size: 12px;">Maximum length 250 characters.</p>
+                        </div>
+
+                        <div id="signup-btn">
+                            <button type="submit" name="create-workspace" class="btn btn-primary"
+                                    data-bs-dismiss="offcanvas" aria-label="Close">Create Workspace
+                            </button>
+                        </div>
+
+                    </form>
+                </li>
+            </ul>
+            <img class="create-workspace-bg" src="/static/assets/svg-vector/create-workspace-bg.svg" alt="">
+            <button type="button" class="btn-close text-reset close-btn" data-bs-dismiss="offcanvas" aria-label="Close">
+            </button>
+
+        </div>
+
+    </div>
+{% endif %}
+
+<div class="parent-div">
+
+    <div class="ms-lg-5 ms-md-3 ms-sm-2" id="sidenav">
+        <div class="nav flex-column nav-pills" style="margin: 0 10px;" id="v-pills-tab" role="tablist"
+             aria-orientation="vertical">
+
+            <a class="btn btn-outline-secondary active" id="v-pills-allBoards-tab" data-bs-target="#v-pills-allBoards"
+               type="button" role="tab" aria-controls="v-pills-allBoards" aria-selected="true" data-bs-toggle="pill">
+                <img src="/static/assets/svg-vector/board_kanban.svg" alt="board-kanban-icon">Boards
+            </a>
+
+            <a class="btn btn-outline-secondary" id="v-pills-template-tab" data-bs-toggle="pill" aria-selected="false"
+               data-bs-target="#v-pills-template" type="button" role="tab" aria-controls="v-pills-template">
+                <img src="/static/assets/svg-vector/template_kanban.svg" alt="template-kanban-icon">Template
+            </a>
+        </div>
+
+        <hr>
+
+        <div id="workspace-sidebar">
+            <h6>Workspaces</h6>
+
+            {% if (user.id == 1 and all_workspaces[1:] == []) or all_workspaces == [] %}
+                <a data-bs-toggle="offcanvas" href="#create_workspace" role="button" aria-controls="create_workspace"
+                   class="account-panel-element">
+                    <img class="workspace-logo" src="/static/assets/svg-vector/workspace.svg" alt="workspace-icon">
+                    Create Workspace
+                </a>
+            {% endif %}
+            <div class="accordion accordion-flush" id="accordionFlushExample">
+                {% for workspace in all_workspaces %}
+                    {% if workspace.workspace_id != 1 %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="head{{ all_workspaces.index(workspace) }}">
+                                <button style="padding: 8px;" class="accordion-button collapsed" type="button"
+                                        data-bs-toggle="collapse" aria-expanded="false"
+                                        data-bs-target="#workspace{{ all_workspaces.index(workspace) }}"
+                                        aria-controls="workspace{{ all_workspaces.index(workspace) }}">
+                                    {#                            <img class="workspace-logo" src="/static/assets/svg-vector/workspace.svg"#}
+                                    {#                                 alt="workspace-icon">#}
+                                    <div style="background: {{ workspace.workspace_logo_color }}"
+                                         class="workspace-logo-accordion">{{ workspace.workspace_name[0].title() }}</div>
+                                    {{ workspace.workspace_name }}
+                                </button>
+                            </h2>
+                            <div id="workspace{{ all_workspaces.index(workspace) }}" class="accordion-collapse collapse"
+                                 aria-labelledby="head{{ all_workspaces.index(workspace) }}"
+                                 data-bs-parent="#accordionFlushExample">
+
+                                <div class="accordion-body">
+                                    <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist">
+                                        <a class="btn btn-outline-secondary" id="v-pills-workspaceBoard-tab"
+                                           data-bs-toggle="pill" type="button"
+                                           data-bs-target="#v-pills-workspaceBoard{{ workspace.workspace_id }}"
+                                           role="tab" aria-controls="v-pills-workspaceBoard" aria-selected="false">
+                                            <img src="/static/assets/svg-vector/board_kanban.svg"
+                                                 alt="board-kanban-icon">
+                                            Boards
+                                        </a>
+                                        <a class="btn btn-outline-secondary" id="v-pills-favBoard-tab"
+                                           data-bs-toggle="pill"
+                                           data-bs-target="#v-pills-favBoard{{ workspace.workspace_id }}" type="button"
+                                           role="tab" aria-controls="v-pills-favBoard" aria-selected="false">
+                                            <img src="/static/assets/svg-vector/favorite.svg" alt="favorite-icon">
+                                            Favorite
+                                        </a>
+                                        <a class="btn btn-outline-secondary" id="v-pills-workspaceMember-tab"
+                                           data-bs-toggle="pill" type="button" disabled="true"
+                                           data-bs-target="#v-pills-workspaceMember{{ workspace.workspace_id }}"
+                                           role="tab" aria-controls="v-pills-workspaceMember" aria-selected="false">
+                                            <img src="/static/assets/svg-vector/many_user.svg" alt="members-icon">
+                                            Members
+                                        </a>
+                                        <a class="btn btn-outline-secondary" id="v-pills-workspaceSetting-tab"
+                                           data-bs-toggle="pill"
+                                           data-bs-target="#v-pills-workspaceSetting{{ workspace.workspace_id }}"
+                                           type="button"
+                                           role="tab" aria-controls="v-pills-workspaceSetting" aria-selected="false">
+                                            <img src="/static/assets/svg-vector/setting.svg" alt="setting-icon">
+                                            Settings
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+
+
+    <section id="main-content">
+        <div class="tab-content" id="v-pills-tabContent">
+
+            <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-template" role="tabpanel" aria-labelledby="v-pills-template-tab">
+                <div class="template-tab">
+                    <div class="template">
+                        <h3><img class="template-icon-img" src="/static/assets/svg-vector/template_kanban.svg" alt="template-kanban-icon">
+                            Templates
+                        </h3>
+                        <hr>
+                        <div class="free-templates-parent">
+                            {% for board in all_templates %}
+                                {% if board.is_template %}
+                                    {% if user.id != 1 %}
+                                        <a href="{{ url_for('board', board_id=board.board_id) }}">
+                                            <div class="board-tile">
+                                                <img class="board-tile-bg" src="{{ board.board_background_image }}"
+                                                     alt="">
+                                                <p>{{ board.board_name }}</p>
+                                                <span class="template-text">Template</span>
+                                            </div>
+                                        </a>
+                                    {% else %}
+                                        <div class="board-tile">
+                                            <a href="{{ url_for('board', board_id=board.board_id) }}">
+                                                <img class="board-tile-bg"
+                                                     src="{{ board.board_background_image }}"
+                                                     alt="">
+                                                <p class="board-name-text">{{ board.board_name }}</p>
+                                                <span class="template-text">Template</span>
+                                            </a>
+
+                                            <div class="dropend">
+                                                <img type="button" class="delete-board-icon" id="dropdownMenu"
+                                                     data-bs-toggle="dropdown" aria-expanded="false"
+                                                     data-bs-target="#delete-board"
+                                                     src="/static/assets/svg-vector/delete-icon.svg" alt="">
+
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenu"
+                                                     id="delete-board">
+                                                    <form action="{{ url_for('boards_manager') }}" method="post"
+                                                          enctype="multipart/form-data" name="del">
+                                                        <input type="hidden" name="Board_Id"
+                                                               value="{{ board.board_id }}">
+                                                        <p>Deleting a board is permanent. There is no undo.</p>
+                                                        <button type="submit" name="delete_board"
+                                                                class="btn btn-danger delete-attachment-modal-btn">
+                                                            Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    {% endif %}
+                                {% endif %}
+                            {% endfor %}
+                            {% if user.id == 1 %}
+                                <div class="board-tile-empty">
+                                    <a href="" data-bs-toggle="modal" data-bs-target="#create-template-modal">
+                                        <p>Create new template</p></a>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+
+            {% for workspace in all_workspaces %}
+                {% if workspace.workspace_id != 1 %}
+
+                    <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-workspaceBoard{{ workspace.workspace_id }}" role="tabpanel"
+                         aria-labelledby="v-pills-workspaceBoard-tab">
+                        <div class="one-workspace">
+                            {#                <h3>YOUR WORKSPACES</h3>#}
+                            <div class="mb-5">
+                                <h4>
+                                    <div style="background:{{ workspace.workspace_logo_color }}"
+                                         class="workspace-logo-main">{{ workspace.workspace_name[0].title() }}</div>
+                                    {{ workspace.workspace_name }}
+                                </h4>
+                                <hr>
+                                <div class="your-boards-parent">
+                                    {% for board in all_boards %}
+                                        {% if workspace.workspace_id == board.parent_workspace_id %}
+
+                                            <div class="board-tile">
+                                                <a href="{{ url_for('board', board_id=board.board_id) }}">
+                                                    <img class="board-tile-bg"
+                                                         src="{{ board.board_background_image }}"
+                                                         alt="">
+                                                    <p class="board-name-text">{{ board.board_name }}</p>
+                                                </a>
+
+                                                <div class="dropdown">
+                                                    <img type="button" class="delete-board-icon" id="dropdownMenu"
+                                                         data-bs-toggle="dropdown" aria-expanded="false"
+                                                         data-bs-target="#delete-board"
+                                                         src="/static/assets/svg-vector/delete-icon.svg" alt="">
+
+                                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu"
+                                                         id="delete-board">
+                                                        <form action="{{ url_for('boards_manager') }}" method="post"
+                                                              enctype="multipart/form-data" name="del">
+                                                            <input type="hidden" name="Board_Id"
+                                                                   value="{{ board.board_id }}">
+                                                            <p>Deleting a board is permanent. There is no undo.</p>
+                                                            <button type="submit" name="delete_board"
+                                                                    class="btn btn-danger delete-attachment-modal-btn">
+                                                                Delete
+                                                            </button>
+                                                        </form>
+                                                    </div>
+                                                </div>
+
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    <div class="board-tile-empty">
+                                        <a href="" data-bs-toggle="modal" data-bs-target="#create-board-modal">
+                                            <p>Create new board</p>
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-favBoard{{ workspace.workspace_id }}" role="tabpanel"
+                         aria-labelledby="v-pills-favBoard-tab">
+                        <div class="one-workspace">
+                            <div class="mb-5">
+                                <h4>
+                                    <div style="background: {{ workspace.workspace_logo_color }}"
+                                         class="workspace-logo-main">{{ workspace.workspace_name[0].title() }}</div>
+                                    {{ workspace.workspace_name }}
+                                </h4>
+                                <hr>
+                                <div class="your-boards-parent">
+                                    {% for board in all_boards %}
+                                        {% if workspace.workspace_id == board.parent_workspace_id and board.board_favorite %}
+                                            <div class="board-tile">
+                                                <a href="{{ url_for('board', board_id=board.board_id) }}">
+                                                    <img class="board-tile-bg" src="{{ board.board_background_image }}"
+                                                         alt="">
+                                                    <p>{{ board.board_name }}</p>
+                                                </a>
+                                            </div>
+                                        {% endif %}
+                                    {% endfor %}
+
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-workspaceMember{{ workspace.workspace_id }}" role="tabpanel"
+                         aria-labelledby="v-pills-workspaceMember-tab">
+                        members{{ workspace.workspace_id }}
+                    </div>
+                    <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-workspaceSetting{{ workspace.workspace_id }}" role="tabpanel"
+                         aria-labelledby="v-pills-workspaceSetting-tab">
+                        <div style="margin:100px 50px;" class="mb-5">
+                            <h4 class="workspace-name-setting">
+                                <div style="background: {{ workspace.workspace_logo_color }}"
+                                     class="workspace-logo-main">{{ workspace.workspace_name[0].title() }}</div>
+                                {{ workspace.workspace_name }}
+                                <img role="button" onclick="showHide('.workspace-name-setting', '.edit-workspace-form')"
+                                     class="edit-icon" src="/static/assets/svg-vector/edit-icon.svg" alt="">
+                            </h4>
+                            <div class="edit-workspace-form hide-toggle">
+                                <form action="{{ url_for('boards_manager') }}" method="post"
+                                      enctype="multipart/form-data">
+                                    <input type="hidden" name="Workspace_Id" value="{{ workspace.workspace_id }}">
+
+                                    <div class="mb-3">
+                                        <label for="exampleInputEmail" class="form-label">Workspace Name</label>
+                                        <input name="Workspace_Name" required maxlength="20"
+                                               value="{{ workspace.workspace_name }}"
+                                               title="no symbols allowed | max-length 20 characters." type="text"
+                                               class="form-control" id="exampleInputEmail"
+                                               placeholder="Treliz Co.">
+                                    </div>
+
+                                    <div class="mb-3">
+
+                                        <label for="description" class="form-label">Workspace description</label>
+                                        <textarea style="resize: none;" name="Workspace_Description" maxlength="250."
+                                                  class="form-control" id="description" rows="5"
+                                                  placeholder="our team organizes everything here...">{{ workspace.workspace_description }}</textarea>
+                                        <p style="font-size: 12px;">Maximum length 250 characters.</p>
+                                    </div>
+
+                                    <div class="mb-3 edit-workspace-form-buttons">
+                                        <button onclick="showHide('.workspace-name-setting', '.edit-workspace-form')"
+                                                type="submit"
+                                                name="edit-workspace" class="btn btn-primary">Save
+                                        </button>
+                                        <button onclick="showHide('.workspace-name-setting', '.edit-workspace-form')"
+                                                type="button" class="btn btn-outline-secondary">Cancel
+                                        </button>
+                                    </div>
+
+                                </form>
+                            </div>
+
+                            <hr>
+                            <div class="workspace-setting">
+                                <img class="setting-icon" src="/static/assets/svg-vector/setting.svg" alt="">
+                                Workspace Settings
+                            </div>
+                            <a role="button" data-bs-toggle="modal"
+                               data-bs-target="#delete-workspace-modal{{ workspace.workspace_id }}"
+                               style="color: #dc3545;">Delete this Workspace?</a>
+
+                            <div class="modal edit-workspace" id="delete-workspace-modal{{ workspace.workspace_id }}"
+                                 tabindex="-1"
+                                 aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="staticBackdropLabel">Delete Workspace?</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                                    aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <ul style="list-style: none; padding: 0; margin: 0;">
+
+                                                <li>
+                                                    <div class="mb-3">
+                                                        <p class="create-board-backgrounds">Enter the Workspace name
+                                                            "{{ workspace.workspace_name }}" to delete</p>
+                                                    </div>
+                                                </li>
+                                                <li><p>Things to know:</p></li>
+                                                <li>
+                                                    <div class="mb-3">
+                                                        <ul style="list-style: disc;">
+                                                            <li>This is permanent and can't be undone.</li>
+                                                            <li>All boards in this Workspace will be deleted.</li>
+                                                        </ul>
+                                                    </div>
+                                                </li>
+                                                <li>
+                                                    <form action="{{ url_for('boards_manager') }}" method="post"
+                                                          enctype="multipart/form-data">
+                                                        <input type="hidden" name="Workspace_Id"
+                                                               value="{{ workspace.workspace_id }}">
+                                                        <div class="mb-3">
+                                                            <label for="delete-workspace-name" class="form-label">
+                                                                Enter the Workspace name to delete</label>
+
+                                                            <input name="Workspace_Name" required maxlength="20"
+                                                                   type="text"
+                                                                   class="form-control" id="delete-workspace-name">
+                                                        </div>
+                                                        <button id="delete-workspace-btn" class="btn btn-danger"
+                                                                name="delete_workspace" disabled>Delete Workspace
+                                                        </button>
+                                                    </form>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <script>
+                                let input = document.getElementById('delete-workspace-name');
+                                let delBtn = document.getElementById("delete-workspace-btn");
+                                input.addEventListener('keyup', function (event) {
+                                    delBtn.disabled = input.value !== '{{ workspace.workspace_name }}';
+                                    {##}
+                                    {#if (input.value === '{{ workspace.workspace_name }}') {#}
+                                    {#    delBtn.disabled = false;#}
+                                    {# else #}
+                                    {#    delBtn.disabled = true;#}
+                                    {##}
+                                });
+
+                            </script>
+
+                        </div>
+
+                    </div>
+                {% endif %}
+            {% endfor %}
+
+
+            {# 4 boards of each workspace including recent and templates #}
+
+            <div class="boards tab-pane fade show active p-lg-4 p-sm-3 p-3" id="v-pills-allBoards" role="tabpanel"
+                 aria-labelledby="v-pills-allBoards-tab">
+                <div class="template">
+
+                    <h3><img class="template-icon-img" src="/static/assets/svg-vector/template_kanban.svg" alt="template-kanban-icon">
+                        Popular templates
+                    </h3>
+                    <div class="your-boards-parent">
+                        {% for board in all_templates[:4] %}
+                            {% if user.id != 1 %}
+                                <div class="board-tile">
+                                    <a href="{{ url_for('board', board_id=board.board_id) }}">
+                                        <img class="board-tile-bg" src="{{ board.board_background_image }}" alt="">
+                                        <p class="board-name-text">{{ board.board_name }}</p>
+                                        <span class="template-text">Template</span>
+                                    </a>
+                                </div>
+                            {% else %}
+
+                                <div class="board-tile">
+                                    <a href="{{ url_for('board', board_id=board.board_id) }}">
+                                        <img class="board-tile-bg"
+                                             src="{{ board.board_background_image }}"
+                                             alt="">
+                                        <p class="board-name-text">{{ board.board_name }}</p>
+                                        <span class="template-text">Template</span>
+                                    </a>
+
+                                    <div class="dropdown">
+                                        <img type="button" class="delete-board-icon" id="dropdownMenu"
+                                             data-bs-toggle="dropdown" aria-expanded="false"
+                                             data-bs-target="#delete-board"
+                                             src="/static/assets/svg-vector/delete-icon.svg" alt="">
+
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenu"
+                                             id="delete-board">
+                                            <form action="{{ url_for('boards_manager') }}" method="post"
+                                                  enctype="multipart/form-data" name="del">
+                                                <input type="hidden" name="Board_Id" value="{{ board.board_id }}">
+                                                <p>Deleting a board is permanent. There is no undo.</p>
+                                                <button type="submit" name="delete_board"
+                                                        class="btn btn-danger delete-attachment-modal-btn">Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            {% endif %}
+
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div class="recently-viewed">
+                    <h3><img class="clock-img" src="/static/assets/svg-vector/clock.svg" alt="clock-icon"/>Recently
+                        viewed</h3>
+
+                    <div class='your-boards-parent'>
+                        {% for board in all_boards_recent[:4] %}
+                            {% if board.is_template %}
+
+                                <div class="board-tile">
+                                    <a href="{{ url_for('board', board_id=board.board_id) }}">
+                                        <img class="board-tile-bg"
+                                             src="{{ board.board_background_image }}"
+                                             alt="">
+                                        <p class="board-name-text">{{ board.board_name }}</p>
+                                        <span class="template-text">Template</span>
+                                    </a>
+
+                                    <div class="dropdown">
+                                        <img type="button" class="delete-board-icon" id="dropdownMenu"
+                                             data-bs-toggle="dropdown" aria-expanded="false"
+                                             data-bs-target="#delete-board"
+                                             src="/static/assets/svg-vector/delete-icon.svg" alt="">
+
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenu"
+                                             id="delete-board">
+                                            <form action="{{ url_for('boards_manager') }}" method="post"
+                                                  enctype="multipart/form-data" name="del">
+                                                <input type="hidden" name="Board_Id" value="{{ board.board_id }}">
+                                                <p>Deleting a board is permanent. There is no undo.</p>
+                                                <button type="submit" name="delete_board"
+                                                        class="btn btn-danger delete-attachment-modal-btn">Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            {% else %}
+                                <div class="board-tile">
+                                    <a href="{{ url_for('board', board_id=board.board_id) }}">
+                                        <img class="board-tile-bg"
+                                             src="{{ board.board_background_image }}"
+                                             alt="">
+                                        <p class="board-name-text">{{ board.board_name }}</p>
+                                    </a>
+
+                                    <div class="dropdown">
+                                        <img type="button" class="delete-board-icon" id="dropdownMenu"
+                                             data-bs-toggle="dropdown" aria-expanded="false"
+                                             data-bs-target="#delete-board"
+                                             src="/static/assets/svg-vector/delete-icon.svg" alt="">
+
+                                        <div class="dropdown-menu" aria-labelledby="dropdownMenu"
+                                             id="delete-board">
+                                            <form action="{{ url_for('boards_manager') }}" method="post"
+                                                  enctype="multipart/form-data" name="del">
+                                                <input type="hidden" name="Board_Id" value="{{ board.board_id }}">
+                                                <p>Deleting a board is permanent. There is no undo.</p>
+                                                <button type="submit" name="delete_board"
+                                                        class="btn btn-danger delete-attachment-modal-btn">Delete
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="workspaces">
+                    <h3>YOUR WORKSPACES</h3>
+                    {% if (user.id == 1 and all_workspaces[1:] == []) or all_workspaces == [] %}
+                        <div style="margin-left: 10px; color:#5f5f5f">No workspace found</div>
+                    {% endif %}
+                    {% for workspace in all_workspaces %}
+                        {% if workspace.workspace_id != 1 %}
+                            <div class="mb-5">
+                                <div class="workspace-name">
+                                    <div style="background: {{ workspace.workspace_logo_color }}"
+                                         class="workspace-logo-boards">{{ workspace.workspace_name[0].title() }}</div>
+                                    {{ workspace.workspace_name }}
+                                </div>
+                                <hr>
+                                <div class="your-boards-parent">
+                                    {% set count = namespace( value = 0) %}
+                                    {% for board in all_boards %}
+                                        {% if workspace.workspace_id == board.parent_workspace_id and not board.is_template %}
+                                            {% if count.value < 3 %}
+
+                                                <div class="board-tile">
+                                                    <a href="{{ url_for('board', board_id=board.board_id) }}">
+                                                        <img class="board-tile-bg"
+                                                             src="{{ board.board_background_image }}"
+                                                             alt="">
+                                                        <p class="board-name-text">{{ board.board_name }}</p>
+                                                    </a>
+
+                                                    <div class="dropdown">
+                                                        <img type="button" class="delete-board-icon" id="dropdownMenu"
+                                                             data-bs-toggle="dropdown" aria-expanded="false"
+                                                             data-bs-target="#delete-board"
+                                                             src="/static/assets/svg-vector/delete-icon.svg" alt="">
+
+                                                        <div class="dropdown-menu" aria-labelledby="dropdownMenu"
+                                                             id="delete-board">
+                                                            <form action="{{ url_for('boards_manager') }}" method="post"
+                                                                  enctype="multipart/form-data" name="del">
+                                                                <input type="hidden" name="Board_Id"
+                                                                       value="{{ board.board_id }}">
+                                                                <p>Deleting a board is permanent. There is no undo.</p>
+                                                                <button type="submit" name="delete_board"
+                                                                        class="btn btn-danger delete-attachment-modal-btn">
+                                                                    Delete
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+
+                                                </div>
+                                            {% endif %}
+                                            {% set count.value = count.value + 1 %}
+                                        {% endif %}
+                                    {% endfor %}
+
+                                    <div class="board-tile-empty">
+                                        <a href="" data-bs-toggle="modal" data-bs-target="#create-board-modal">
+                                            <p>Create new board</p></a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </section>
+</div>
+
+<div class="modal" id="create-board-modal" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+
+                    <li><p class="create-board-title">Create board</p></li>
+                    <li>
+                        <div class="background-img-display">
+                            <img id="board-bg-display-modal"
+                                 src="/static/assets/svg-vector/placeholder_board_bg.svg" alt="">
+                        </div>
+                    </li>
+                    <li><p class="create-board-backgrounds">Background</p></li>
+                    <li>
+                        <form class="create-board-form" action="{{ url_for('boards_manager') }}" method="post"
+                              enctype="multipart/form-data">
+                            <div class="flex-img-parent">
+                                {% for bg_img in all_images[:4] %}
+                                    <input required type="radio" class="board-bg-img-modal" name="boardBackgroundOption"
+                                           id="imgRadioModal{{ all_images.index(bg_img) }}"
+                                           value="{{ bg_img }}">
+                                    <label class="display-selector" for="imgRadioModal{{ all_images.index(bg_img) }}"
+                                           style="background-image: url('{{ bg_img }}');"></label>
+                                {% endfor %}
+                            </div>
+                            <div class="flex-color-parent">
+                                {% for bg_color in all_colors[:6] %}
+                                    <input required type="radio" class="board-bg-color-modal"
+                                           name="boardBackgroundOption"
+                                           id="colorRadioModal{{ all_colors.index(bg_color) }}"
+                                           value="/static/assets/images/board_background_img/bg_colors/{{ bg_color }}">
+                                    <label class="display-selector"
+                                           for="colorRadioModal{{ all_colors.index(bg_color) }}"
+                                           style="background-image: url('/static/assets/images/board_background_img/bg_colors/{{ bg_color }}');"></label>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="mb-2">
+                                <label for="exampleInputEmail" class="form-label">Board title</label>
+                                <input required maxlength="20" type="text" name="Board_Name" class="form-control"
+                                       id="exampleInputEmail" placeholder="Board name">
+                            </div>
+
+                            {% if (user.id == 1 and all_workspaces[1:]|count > 1) or all_workspaces|count > 1 %}
+                                <div class="mb-2">
+                                    <label for="workspace-selector" class="form-label">Workspace</label>
+                                    <select id="workspace-selector" name="Board_Workspace" class="form-select"
+                                            aria-label="Default select example">
+                                        {% if user.id == 1 %}
+                                            <option value="{{ all_workspaces[1].workspace_id }}"
+                                                    selected>{{ all_workspaces[1].workspace_name }}</option>
+                                            {% for workspace in all_workspaces[2:] %}
+                                                <option value="{{ workspace.workspace_id }}">{{ workspace.workspace_name }}</option>
+                                            {% endfor %}
+                                        {% else %}
+                                            <option value="{{ all_workspaces[0].workspace_id }}"
+                                                    selected>{{ all_workspaces[0].workspace_name }}</option>
+                                            {% for workspace in all_workspaces[1:] %}
+                                                <option value="{{ workspace.workspace_id }}">{{ workspace.workspace_name }}</option>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+                                </div>
+
+                            {% endif %}
+
+                            <div class="mb-3">
+
+                                <label for="browsers" class="form-label">Visibility</label>
+                                <select id="browsers" name="Board_Visibility" class="form-select"
+                                        aria-label="Default select example">
+                                    <option selected>Workspace</option>
+                                    <option value="Private">Private</option>
+                                    <option value="Public">Public</option>
+                                </select>
+                            </div>
+
+                            <div id="signup-btn">
+                                <button name="create_board" type="submit" class="btn btn-primary">Create</button>
+                            </div>
+                        </form>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="create-template-modal" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-body">
+                <ul style="list-style: none; padding: 0; margin: 0;">
+
+                    <li><p class="create-board-title">Create template</p></li>
+                    <li>
+                        <div class="background-img-display">
+                            <img id="template-bg-display-modal"
+                                 src="/static/assets/svg-vector/placeholder_board_bg.svg" alt="">
+                        </div>
+                    </li>
+                    <li><p class="create-board-backgrounds">Background</p></li>
+                    <li>
+                        <form class="create-board-form" action="{{ url_for('boards_manager') }}" method="post"
+                              enctype="multipart/form-data">
+                            <div class="flex-img-parent">
+                                {% for bg_img in all_images[:4] %}
+                                    <input required type="radio" class="board-bg-img-modal form-control"
+                                           name="templateBgOption"
+                                           id="imgRadioModal1{{ all_images.index(bg_img) }}"
+                                           value="{{ bg_img }}"/>
+                                    <label class="display-selector" for="imgRadioModal1{{ all_images.index(bg_img) }}"
+                                           style="background-image: url('{{ bg_img }}');"></label>
+                                {% endfor %}
+
+                            </div>
+                            <div class="flex-color-parent">
+                                {% for bg_color in all_colors[:6] %}
+                                    <input required type="radio" class="board-bg-color-modal form-control"
+                                           name="templateBgOption"
+                                           id="colorRadioModal1{{ all_colors.index(bg_color) }}"
+                                           value="/static/assets/images/board_background_img/bg_colors/{{ bg_color }}"/>
+                                    <label class="display-selector"
+                                           for="colorRadioModal1{{ all_colors.index(bg_color) }}"
+                                           style="background-image: url('/static/assets/images/board_background_img/bg_colors/{{ bg_color }}');"></label>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <div class="mb-2">
+                                <label for="templateName" class="form-label">Template title</label>
+                                <input required maxlength="20" type="text" name="Template_Name" class="form-control"
+                                       id="templateName" placeholder="Template name">
+                            </div>
+
+                            <div id="signup-btn">
+                                <button role="button" name="create_template" type="submit" class="btn btn-primary">
+                                    Create
+                                </button>
+                            </div>
+                        </form>
+                    </li>
+
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let displaySelectors = document.getElementsByClassName('display-selector');
+    let displayDivModal = document.getElementById('board-bg-display-modal');
+    let displayDiv = document.getElementById('board-bg-display');
+    let displayTemplateDiv = document.getElementById('template-bg-display-modal');
+    {#let displaySelectors = #}
+
+    for (let i = 0; i < displaySelectors.length; i++) {
+        displaySelectors[i].addEventListener('click', function () {
+            let selectorSRC = displaySelectors[i].style.backgroundImage.slice(4, -1).replace(/"/g, "")
+            for (let j = 0; j < displaySelectors.length; j++) {
+                displaySelectors[j].style.border = "1px solid white";
+                displaySelectors[j].style.boxShadow = 'none';
+            }
+            displaySelectors[i].style.border = "2px solid #86b7fe";
+            displaySelectors[i].style.boxShadow = "0 0 0 .25rem rgba(13, 110, 253, .25)";
+            changeImage(selectorSRC);
+        });
+    }
+
+    function changeImage(source) {
+        displayDivModal.src = source
+        displayDiv.src = source
+        displayTemplateDiv.src = source
+    }
+
+</script>
+<script>
+    function showHide(a, b) {
+        let btn = document.querySelector(a);
+        let div = document.querySelector(b);
+        btn.classList.toggle('hide-toggle');
+        div.classList.toggle('hide-toggle');
+    }
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
+        crossorigin="anonymous">
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+        integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+        crossorigin="anonymous">
+
+</script>
+
+</body>

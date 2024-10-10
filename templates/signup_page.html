@@ -1,0 +1,72 @@
+{% include "header.html" %}
+
+
+<body>
+
+<div class="main-container-signup" style="align-self: center">
+
+    <img class="vector-bg1" src="/static/assets/images/bg-vector1.png" alt="background vector">
+    <img class="vector-bg2" src="/static/assets/images/bg-vector2.png" alt="background vector">
+
+    <div class="shadow mb-5 bg-white rounded shadow-card-signup">
+        <div class="logo-img-signup">
+            <img class="" src="/static/assets/images/logo.png" alt="logo">
+            <h2 class="signup-heading">Sign up to continue</h2>
+        </div>
+
+        <form class="signup-form" action="{{ url_for('signup_page') }}" method="post" enctype="multipart/form-data">
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div id="flash">
+                            <p class="flash_message">{{ message }}</p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="mb-3">
+                <label for="exampleInputName" class="form-label">Name</label>
+                <input required type="text" name="Name" class="form-control" id="exampleInputName"
+                       placeholder="Enter your name">
+            </div>
+
+            <div class="mb-3">
+                <label for="exampleInputEmail" class="form-label">Email</label>
+                <input pattern="[a-z0-9._+]+@[a-z0-9 -]+\.[a-z]{2,}" title="Enter a valid email." required type="email"
+                       name="Email" value="{{ email }}" class="form-control" id="exampleInputEmail"
+                       placeholder="Enter your email">
+            </div>
+
+            <div class="mb-3">
+                <label for="exampleInputPassword" class="form-label">Create Password</label>
+                <input title="Enter at least 8 character long password." pattern="[a-zA-Z0-9 ]{8,}" required
+                       type="password" name="Password" class="form-control" id="exampleInputPassword"
+                       placeholder="Create a strong password">
+                <p style="font-size: 12px">Must be at least 8 characters long.</p>
+            </div>
+
+            <div class="mb-3">
+                <label for="exampleInputRePassword" class="form-label">Confirm Password</label>
+                <input required type="password" name="Re-Password" class="form-control" id="exampleInputRePassword"
+                       placeholder="Re-enter password">
+            </div>
+
+            <p class="term-cond-signup">By signing up, I accept the Treliz <a href="#">Terms and Condition</a> and
+                acknowledge the
+                <a href="#">Privacy Policy.</a></p>
+
+            <div id="signup-btn">
+                <button type="submit" class="btn btn-primary">Sign up</button>
+            </div>
+
+        </form>
+
+        <p class="have-account-btn">Already have an account? <a href="{{ url_for('login_page') }}"> Log in</a></p>
+
+    </div>
+</div>
+
+
+</body>

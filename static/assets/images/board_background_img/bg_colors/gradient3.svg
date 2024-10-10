@@ -1,0 +1,13 @@
+<svg viewBox="0 0 1920 1920" fill="none" xmlns="http://www.w3.org/2000/svg"
+     id="Cyan-Blue-Subtle--Streamline-Gradient-Bg.svg" height="100%" width="100%" preserveAspectRatio="none" stroke-width="1">
+    <desc>Cyan Blue Subtle Streamline Element: https://streamlinehq.com</desc>
+    <path fill="white" d="m0 .5 1920 0 0 1920-1920 0Z"></path>
+    <path fill="url(#paint0_linear_121_139)" style="mix-blend-mode:darken" d="M0 .0078h1920v1920H0Z"></path>
+    <defs>
+        <linearGradient id="paint0_linear_121_139" x1="134.512" y1="212.101" x2="2113.83" y2="1361.14"
+                        gradientUnits="userSpaceOnUse">
+            <stop stop-color="#BBFBFF"></stop>
+            <stop offset="1" stop-color="#849FFF"></stop>
+        </linearGradient>
+    </defs>
+</svg>

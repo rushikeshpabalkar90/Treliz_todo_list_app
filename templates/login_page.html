@@ -1,0 +1,51 @@
+{% include "header.html" %}
+
+<body>
+
+<div class="main-container-login" style="align-self: center">
+
+    <img class="vector-bg1" src="/static/assets/images/bg-vector1.png" alt="background vector">
+    <img class="vector-bg2" src="/static/assets/images/bg-vector2.png" alt="background vector">
+
+    <div class="shadow mb-5 bg-white rounded shadow-card-login">
+        <div class="logo-img-signup">
+            <img class="" src="/static/assets/images/logo.png" alt="logo">
+            <h2 class="login-heading">Log in to continue</h2>
+        </div>
+
+        <form class="signup-form" action="{{ url_for('login_page') }}" method="post" enctype="multipart/form-data">
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                    {% for message in messages %}
+                        <div id="flash">
+                            <p class="flash_message">{{ message }}</p>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+
+            <div class="mb-3">
+                <input required type="email" name="Email" class="form-control" placeholder="Enter email">
+            </div>
+
+            <div class="mb-1">
+                <input required type="password" name="Password" class="form-control" id="exampleInputPassword"
+                       placeholder="Enter password">
+            </div>
+
+            <div style="text-align: left; font-size: 13px" class="mb-3">
+                <a class="have-account-btn" href="{{ url_for('reset_password') }}">forgot password?</a>
+            </div>
+
+            <div id="signup-btn">
+                <button type="submit" class="btn btn-primary">Log in</button>
+            </div>
+
+        </form>
+        <p class="continue-text-login">or continue with</p>
+        <p class="have-account-btn"> Can't log in? <a href="{{ url_for('signup_page') }}"> . Create an account</a></p>
+
+    </div>
+</div>
+</body>

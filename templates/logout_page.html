@@ -1,0 +1,38 @@
+{% include "header.html" %}
+
+<body>
+<div class="main-container-logout" style="align-self: center">
+
+    <img class="vector-bg1" src="/static/assets/images/bg-vector1.png" alt="background vector">
+    <img class="vector-bg2" src="/static/assets/images/bg-vector2.png" alt="background vector">
+
+    <div class="shadow mb-5 bg-white rounded shadow-card-login">
+        <div class="logo-img-signup">
+            <img class="" src="/static/assets/images/logo.png" alt="logo">
+            <h2 class="login-heading">Log out of your Treliz account</h2>
+        </div>
+
+        <div class="row account-info-logout">
+
+            <div class="column column1-logout">
+                <div style="background: {{ user.user_logo_color }}" class="avatar">{{ user.user_name[0].title() }}</div>
+            </div>
+
+            <div class="column column2-logout">
+                <h3 class="name-logout">{{ user.user_name.title() }}</h3>
+                <p class="email-logout">{{ user.user_email }}</p>
+            </div>
+
+        </div>
+        <form class="logout-form" action="{{ url_for('logout_page') }}" method="post" enctype="multipart/form-data">
+            <input type="hidden" name="User_Id" value="{{ user.user_id }}">
+            <div id="signup-btn">
+                <button type="submit" class="btn btn-primary" name="logout_user">Log out</button>
+            </div>
+        </form>
+        <p class="have-account-btn"><a href="{{ url_for('login_page') }}">Log in</a> to another account</p>
+
+    </div>
+</div>
+
+</body>

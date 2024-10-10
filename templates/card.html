@@ -1,0 +1,1597 @@
+{% include 'header.html' %}
+<body>
+
+<div class="background">
+    <img src="{{ one_board.board_background_image }}" alt="">
+</div>
+
+<div class="navbar-bg-blur">
+
+
+    <div id="navbar">
+
+        <div class="back-icon">
+            <a href="{{ url_for('boards_manager') }}">
+                <img src="/static/assets/svg-vector/back-icon.svg" alt="">
+            </a>
+        </div>
+        <div class="board-name" onclick="showHide('.board-name', '.board-name-edit-form')">
+            <div class="nav-title">{{ one_board.board_name }}</div>
+        </div>
+
+        <div class="board-name-edit-form hide-toggle">
+            <form class="board-name-edit" action="{{ url_for('board', board_id=one_board.board_id) }}" method="post"
+                  enctype="multipart/form-data">
+
+                <input required maxlength="20" type="text" name="Board_Name_Edit" class="form-control"
+                       value="{{ one_board.board_name }}">
+
+                <button name="board_name_edit_form" type="submit"
+                        class="btn btn-primary add-list-form-btn">Save
+                </button>
+
+                <a href="#" type="button" onclick="showHide('.board-name', '.board-name-edit-form')"
+                   class="close-btn-form-card">
+                    <div>
+                        <img src="/static/assets/svg-vector/close-button.svg" alt="">
+                    </div>
+                </a>
+            </form>
+        </div>
+
+
+        <div class="filter-btn">
+            <a href="#"><img class="filter-icon" src="/static/assets/svg-vector/filter.svg" alt="filter-icon">Filter</a>
+        </div>
+        <div class="change-bg-btn">
+            <a href="#"><img class="change-bg-icon" src="/static/assets/svg-vector/change-background.svg"
+                             alt="change-background-icon">Change background</a>
+        </div>
+    </div>
+
+</div>
+
+
+<div class="edit-card-form">
+    <div class="modal-content1">
+        {% if one_card.card_cover %}
+            <div class="edit-card-cover-container">
+                <img src="{{ one_card.card_cover }}" alt="">
+                {# <img style="height: 12px;" src="/static/assets/svg-vector/cover.svg" alt="">#}
+            </div>
+        {% endif %}
+
+
+        <div class="modal-body1">
+            <a type="button" href="{{ url_for('board', board_id=one_board.board_id) }}"
+               class="btn-close text-reset close-edit-card-btn"></a>
+
+            <div class="edit-card-form-main">
+                <div class="card-name-parent">
+                    <div class="card-name-display{{ one_card.card_id }} card-name"
+                         onclick="showHideListForm('.card-name-display{{ one_card.card_id }}',
+                                 '.card-name-edit-form{{ one_card.card_id }}')">
+                        <img src="/static/assets/svg-vector/card-icon.svg" alt="">
+                        {{ one_card.card_name }}
+                        <p>in list <u>{{ one_list.list_name }}</u></p>
+                    </div>
+                    <form class="card-name-edit-form{{ one_card.card_id }} hide-toggle"
+                          action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id ) }}"
+                          method="post" enctype="multipart/form-data">
+                        <div class="my-2">
+                            <input type="text" class="form-control" maxlength="20" required
+                                   value="{{ one_card.card_name }}" name="Card_Name">
+                        </div>
+                        <button type="submit" class="btn btn-primary"
+                                name="card_name_edit">
+                            save
+                        </button>
+                        <button type="button" class="btn btn-primary"
+                                onclick="showHideListForm('.card-name-display{{ one_card.card_id }}',
+                                        '.card-name-edit-form{{ one_card.card_id }}')">
+                            cancel
+                        </button>
+                    </form>
+                </div>
+
+                <div class="my-2 card-dueDate-parent">
+                    {% if one_card.card_dueDate %}
+                        <div class="due-date">
+                            <img src="/static/assets/svg-vector/clock.svg" alt="">Due date
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn btn-outline-secondary due-date-btn" id="dropdownMenu"
+                                    data-bs-toggle="dropdown" data-bs-target="#date-picker" type="button"
+                                    aria-expanded="false">
+                                {{ one_card.card_dueDate.strftime('%d-%m-%Y') }}
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="date-picker">
+                                <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                                      method="post" enctype="multipart/form-data">
+                                    <p class="dropdown-title mx-auto my-2">Due Date</p>
+                                    <hr class="my-1">
+                                    <div class="modal-body">
+                                        <input class="my-3" type="date" name="Card_Due_Date"
+                                               placeholder="dd-mm-yyyy"
+                                               value="{{ one_card.card_dueDate }}">
+                                    </div>
+                                    <div class="card-action-dropdown-btn">
+                                        <button type="submit" class="btn btn-primary"
+                                                data-bs-dismiss="modal" name="card_due_date">
+                                            Save
+                                        </button>
+                                        <button type="submit" class="btn btn-secondary"
+                                                name="remove_card_due_date"
+                                                value="1" data-bs-dismiss="modal">
+                                            Remove
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                    {% endif %}
+                </div>
+
+                <div class="my-2 card-description-parent">
+
+                    <div class="card-description">
+                        <img src="/static/assets/svg-vector/description.svg" alt="">Description
+                    </div>
+                    {% if one_card.card_description %}
+                        <button onclick="editBtn()" class="btn btn-secondary edit-description-btn{{ one_card.card_id }}
+                        edit-desc-btn" id="editBtn">Edit
+                        </button>
+                    {% endif %}
+                    {% if not one_card.card_description %}
+                        <div onclick="writeDesc()" class="desc-div add-desc-div{{ one_card.card_id }}" id="div">
+                            Add a more detailed description...
+                        </div>
+                    {% else %}
+                        <div id="card-desc-text">{{ one_card.card_description| safe }}</div>
+                    {% endif %}
+
+
+                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                          method="post" enctype="multipart/form-data" id="textboxForm" name="form1">
+                        <div class="edit-card-desc-textbox edit-card-description-textbox{{ one_card.card_id }} hide-toggle"
+                             id="textbox">
+                            {{ ckeditor.load() }}
+                            {{ ckeditor.config() }}
+
+                            {{ ckeditor.create() }}
+                            <button onclick="saveTextbox()"
+                                    class="btn btn-primary save-description" type="button" name="card_description">
+                                save
+                            </button>
+                            <button onclick="cancelTextbox()" type="button"
+                                    class="btn btn-secondary cancel-description">
+                                cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="my-2 card-attachment-parent">
+                    {% set count = namespace(value=0) %}
+
+                    {% for attachment in all_attachments %}
+                        {% if attachment.parent_card_id == one_card.card_id %}
+                            {% set count.value = count.value + 1 %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% set a = namespace(value=True) %}
+
+                    {% for attach in all_attachments %}
+                        {% if attach.parent_card_id == one_card.card_id %}
+                            {% if attach.is_cover_image and count.value < 2 %}
+                                {% set a.value = False %}
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if a.value %}
+                        {#                        {% set a = all_attachments|selectattr("parent_card_id", one_card.card_id|string )|list %}#}
+                        {#                        {{ a }}#}
+                        {#                        we want to if there is only cover image in attachments#}
+
+                        <div class="card-attachment me-auto">
+                            <img src="/static/assets/svg-vector/attachment.svg" alt="">Attachment
+                        </div>
+
+                        <div class="dropdown">
+                            <a class="btn btn-secondary add-attachment-btn" id="dropdownMenu" data-bs-toggle="dropdown"
+                               type="button" aria-expanded="false" data-bs-target="#attachment-uploader">Add
+                            </a>
+                            <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="attachment-uploader">
+                                <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id ) }}"
+                                      method="post" enctype="multipart/form-data">
+                                    <p class="dropdown-title mx-auto my-2">Attachment</p>
+                                    <hr class="my-1">
+                                    {% with messages = get_flashed_messages() %}
+                                        {% if messages %}
+                                            {% for message in messages %}
+                                                <div id="flash">
+                                                    <p class="flash_message">{{ message }}</p>
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endwith %}
+                                    <div class="my-3">
+                                        <input required type="file" class="form-control"
+                                               name="Card_Attachment_File">
+                                    </div>
+                                    <div class="card-action-dropdown-btn">
+                                        <button type="submit" name="card_attachment" class="btn btn-primary">
+                                            Upload
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+
+                        {% for attachment in all_attachments %}
+                            {% if attachment.parent_card_id == one_card.card_id %}
+                                {% if not attachment.is_cover_image %}
+                                    <div class="shadow-sm bg-white attachment-tile">
+                                        <div class="attachment-display">
+                                            {% if attachment.attachment_extension in ['.jpg', '.jpeg', '.png', '.gif', '.svg'] %}
+                                                <img src="{{ attachment.attachment_path }}" alt="">
+                                            {% else %}
+                                                <h3>{{ attachment.attachment_extension[1:] }}</h3>
+                                            {% endif %}
+                                        </div>
+                                        <div class="attachment-details">
+                                            <h4 class="attachment-name">{{ attachment.attachment_name }}</h4>
+                                            <p class="attachment-added">
+                                                Added {{ attachment.attachment_upload_date }}</p>
+
+{#                                            {% if attachment.attachment_extension in ['.jpg', '.jpeg', '.png', '.gif', '.svg'] %}#}
+{#                                                <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id ) }}"#}
+{#                                                      method="post" enctype="multipart/form-data">#}
+{#                                                    <input type="hidden" name="Attachment_Id"#}
+{#                                                           value="{{ attachment.attachment_id }}">#}
+{#                                                    <button name="make_cover" class="make-cover-btn"><u>Make#}
+{#                                                        cover</u></button>#}
+{#                                                </form>#}
+{#                                            {% endif %}#}
+
+                                        </div>
+                                        <div class="delete-attachment">
+                                            <div class="dropdown">
+                                                <button class="btn-close delete-attachment-btn"
+                                                        id="dropdownMenu"
+                                                        data-bs-toggle="dropdown" aria-expanded="false"
+                                                        value="{{ attachment.attachment_id }}" type="button"
+                                                        data-bs-target="#delete-attach">
+                                                </button>
+                                                <div class="dropdown-menu" aria-labelledby="dropdownMenu"
+                                                     id="delete-attach">
+                                                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                                                          method="post" enctype="multipart/form-data">
+                                                        <input class='modal-body-input' type="hidden"
+                                                               name="attachment_id" value="">
+                                                        <p>Deleting an attachment is permanent. There is no
+                                                            undo.</p>
+                                                        <button data-bs-dismiss="modal" type="submit"
+                                                                class="btn btn-danger delete-attachment-modal-btn"
+                                                                name="delete_card_attachment">Delete
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </div>
+
+                                        </div>
+                                    </div>
+                                {% endif %}
+                            {% endif %}
+
+                        {% endfor %}
+
+                    {% endif %}
+                </div>
+                {% if one_card.card_checklist_name %}
+
+                    <div class="card-checklist-parent">
+
+                        <div style="width: 100%;" class="check{{ one_card.card_id }} ">
+                            <div class="check-name-parent">
+                                <div class="checklist-name-display me-auto" type="button"
+                                     onclick="showHideListForm('.check{{ one_card.card_id }}', '.check-form{{ one_card.card_id }}')">
+                                    <img src="/static/assets/svg-vector/checkbox.svg"
+                                         alt="">{{ one_card.card_checklist_name }}
+                                </div>
+
+                                <div class="dropdown">
+                                    <button class="btn btn-secondary delete-checklist-btn" id="dropdownMenu"
+                                            data-bs-toggle="dropdown"
+                                            type="button" aria-expanded="false" data-bs-target="#delete-checklist">
+                                        Delete
+                                    </button>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="delete-checklist">
+                                        <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                                              method="post" enctype="multipart/form-data">
+                                            <input type="hidden" name="delete_checklist">
+                                            <p>Deleting a checklist is permanent. There is no undo.</p>
+                                            <button data-bs-dismiss="modal"
+                                                    class="btn btn-danger delete-checklist-modal-btn"
+                                                    type="submit">Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+
+                        <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                              method="post" enctype="multipart/form-data"
+                              class="checklist-name-edit-form check-form{{ one_card.card_id }} hide-toggle">
+                            <div class="mb-3">
+                                <input required maxlength="20" type="text" class="form-control"
+                                       value="{{ one_card.card_checklist_name }}"
+                                       name="Card_Checklist_Name">
+                            </div>
+                            <button type="submit" class="btn btn-primary" name="edit_checklist_name">
+                                Save
+                            </button>
+                            <button type="button" class="btn btn-secondary"
+                                    onclick="showHideListForm('.check{{ one_card.card_id }}', '.check-form{{ one_card.card_id }}')">
+                                Cancel
+                            </button>
+                        </form>
+                        <div class="checklist-progressbar">
+
+                            <div class="progress-percentage">
+                                <p>{{ completed_task_perc }}%</p>
+                            </div>
+
+                            <div class="progress progress-container">
+                                <div class="progress-bar bg-success" role="progressbar"
+                                     aria-valuenow="{{ completed_task_perc }}"
+                                     aria-valuemin="0" aria-valuemax="100"
+                                     style="width: {{ completed_task_perc }}%;">
+                                </div>
+                            </div>
+
+                        </div>
+
+                        {% for item in all_items %}
+                            {% if item.parent_card_id == one_card.card_id %}
+
+                                <div class="form-check checklist-item">
+                                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                                          method="post" enctype="multipart/form-data">
+                                        <input type="hidden" name="Item_Id" value="{{ item.item_id }}">
+                                        <div class="checkbox-icon-btn">
+                                            {% if item.item_status %}
+                                                <button class="checkbox-btn" type="submit"
+                                                        name="checklist_item_checkbox">
+                                                    <img class="checkbox-icon"
+                                                         src="/static/assets/svg-vector/check-icon.svg" alt="">
+                                                </button>
+                                            {% else %}
+                                                <button class="checkbox-btn" type="submit"
+                                                        name="checklist_item_checkbox">
+                                                    <img class="checkbox-icon"
+                                                         src="/static/assets/svg-vector/uncheck-icon.svg"
+                                                         alt="">
+                                                </button>
+                                            {% endif %}
+                                        </div>
+
+                                        <span class="item{{ item.item_id }}">
+                                            <span onclick="showHideListForm('.item{{ item.item_id }}',
+                                                    '.item-edit{{ item.item_id }}')"
+                                                  class="form-check-label checklist-item{{ item.item_id }}
+                                                  checklist-item-label">{{ item.item_name }}</span>
+                                                <button type="submit"
+                                                        name="delete_checklist_item"
+                                                        class="btn-close delete-checklist-item-btn"></button>
+                                        </span>
+                                    </form>
+
+
+                                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                                          method="post" enctype="multipart/form-data"
+                                          class="item-edit-form item-edit{{ item.item_id }} hide-toggle">
+                                        <input type="hidden" value="{{ item.item_id }}" name="Item_Id">
+
+                                        <div class="mb-3">
+                                            <input required maxlength="20" type="text" class="form-control"
+                                                   value="{{ item.item_name }}" name="Item_Name">
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary" name="edit_item_name">
+                                            Save
+                                        </button>
+                                        <button type="button" class="btn btn-secondary"
+                                                onclick="showHideListForm('.item{{ item.item_id }}',
+                                                        '.item-edit{{ item.item_id }}')"> Cancel
+                                        </button>
+                                    </form>
+                                </div>
+                            {% endif %}
+                        {% endfor %}
+
+                        <a onclick="showHideListForm('.add-item-btn{{ one_card.card_id }}',
+                                '.add-item-form{{ one_card.card_id }}')"
+                           class="btn btn-secondary add-item-checklist-btn add-item-btn{{ one_card.card_id }}">
+                            Add an item</a>
+
+                        <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                              method="post" enctype="multipart/form-data"
+                              class="item-add-form add-item-form{{ one_card.card_id }} hide-toggle">
+
+                            <div class="mb-3">
+                                <input type="text" class="form-control" placeholder="Add an item"
+                                       name="Item_Name">
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" name="add_checklist_item">Add</button>
+
+                            <button type="button" class="btn btn-secondary"
+                                    onclick="showHideListForm('.add-item-btn{{ one_card.card_id }}',
+                                            '.add-item-form{{ one_card.card_id }}')">
+                                Cancel
+                            </button>
+                        </form>
+                    </div>
+                {% endif %}
+
+            </div>
+
+
+            <div class="edit-card-form-action">
+
+                <div class="actions">
+                    <ul>
+                        <li class="action-title">Add to Card</li>
+                        <li><a class="btn btn-secondary action-btn" disabled>
+                            <img src="/static/assets/svg-vector/many_user.svg" alt="">Members</a>
+                        </li>
+                        {% if not one_card.card_checklist_name %}
+                            <li>
+
+                                <div class="dropdown">
+                                    <a class="btn btn-secondary action-btn" id="dropdownMenu" data-bs-toggle="dropdown"
+                                       type="button" aria-expanded="false" data-bs-target="#add-checklist">
+                                        <img src="/static/assets/svg-vector/checkbox.svg" alt="">Checklist
+                                    </a>
+                                    <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="add-checklist">
+                                        <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id ) }}"
+                                              method="post" enctype="multipart/form-data">
+                                            <p class="dropdown-title mx-auto my-2">Add Checklist</p>
+                                            <hr class="my-1">
+                                            <div class="my-3">
+                                                <label for="checklist-title">Title</label>
+                                                <input type="text" class="form-control" id="checklist-title"
+                                                       name="Card_Checklist_Name" placeholder="checklist name">
+                                            </div>
+                                            <div class="card-action-dropdown-btn">
+                                                <button data-bs-dismiss="modal" class="btn btn-primary"
+                                                        type="submit" name="card_checklist">Add
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </li>
+                        {% endif %}
+                        <li>
+                            <div class="dropdown">
+                                <a class="btn btn-secondary action-btn" id="dropdownMenu" data-bs-toggle="dropdown"
+                                   data-bs-target="#date-picker" type="button" aria-expanded="false">
+                                    <img src="/static/assets/svg-vector/clock.svg" alt="">Dates
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="date-picker">
+                                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                                          method="post" enctype="multipart/form-data">
+                                        <p class="dropdown-title mx-auto my-2">Due Date</p>
+                                        <hr class="my-1">
+                                        <div class="modal-body">
+                                            <input class="my-3" type="date" name="Card_Due_Date"
+                                                   placeholder="dd-mm-yyyy"
+                                                   value="{{ one_card.card_dueDate }}">
+                                        </div>
+                                        <div class="card-action-dropdown-btn">
+                                            <button type="submit" class="btn btn-primary"
+                                                    data-bs-dismiss="modal" name="card_due_date">
+                                                Save
+                                            </button>
+                                            <button type="submit" class="btn btn-secondary" name="remove_card_due_date"
+                                                    value="1" data-bs-dismiss="modal">
+                                                Remove
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            {#                              <a class="btn btn-secondary action-btn" href="#" data-bs-toggle="modal"#}
+                            {#                               data-bs-target="#date-picker">#}
+                            {#                                <img src="/static/assets/svg-vector/clock.svg" alt="">Dates#}
+                            {#                            </a>#}
+
+                        </li>
+                        <li>
+                            <div class="dropdown">
+                                <a class="btn btn-secondary action-btn" id="dropdownMenu" data-bs-toggle="dropdown"
+                                   type="button" aria-expanded="false" data-bs-target="#attachment-uploader">
+                                    <img src="/static/assets/svg-vector/attachment.svg" alt="">Attachment
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="attachment-uploader">
+                                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id ) }}"
+                                          method="post" enctype="multipart/form-data">
+                                        <p class="dropdown-title mx-auto my-2">Attachment</p>
+                                        <hr class="my-1">
+                                        {% with messages = get_flashed_messages() %}
+                                            {% if messages %}
+                                                {% for message in messages %}
+                                                    <div id="flash">
+                                                        <p class="flash_message">{{ message }}</p>
+                                                    </div>
+                                                {% endfor %}
+                                            {% endif %}
+                                        {% endwith %}
+                                        <div class="my-3">
+                                            <input required type="file" class="form-control"
+                                                   name="Card_Attachment_File">
+                                        </div>
+                                        <div class="card-action-dropdown-btn">
+                                            <button type="submit" name="card_attachment" class="btn btn-primary">
+                                                Upload
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </li>
+                        <li>
+                            <div class="dropdown dropend">
+                                <a class="btn btn-secondary action-btn" id="dropdownMenu" data-bs-toggle="dropdown"
+                                   type="button" aria-expanded="false" data-bs-target="#add-cover"
+                                   data-bs-auto-close="outside">
+                                    <img src="/static/assets/svg-vector/cover.svg" alt="">Cover
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="add-cover">
+                                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id ) }}"
+                                          method="post" enctype="multipart/form-data">
+                                        <p class="dropdown-title mx-auto my-2">Add Cover</p>
+                                        <hr class="my-1">
+                                        <label class="sec-title">Colors</label>
+                                        <div class="flex-color-parent">
+                                            {% for bg_color in all_colors[:10] %}
+                                                <input type="radio" class="board-bg-color-modal"
+                                                       name="cardCoverOption"
+                                                       id="colorRadioModal{{ all_colors.index(bg_color) }}"
+                                                       value="/static/assets/images/board_background_img/bg_colors/{{ bg_color }}">
+                                                <label class="display-selector"
+                                                       for="colorRadioModal{{ all_colors.index(bg_color) }}"
+                                                       style="background-image: url('/static/assets/images/board_background_img/bg_colors/{{ bg_color }}');"></label>
+
+                                            {% endfor %}
+
+                                        </div>
+
+                                        <label class="sec-title">Images</label>
+                                        <div class="flex-img-parent">
+                                            {% for bg_img in all_images[:6] %}
+                                                <input type="radio" class="board-bg-img-modal" name="cardCoverOption"
+                                                       id="imgRadioModal{{ all_images.index(bg_img) }}"
+                                                       value="/static/assets/images/board_background_img/bg_images/{{ bg_img }}">
+                                                <label class="display-selector"
+                                                       for="imgRadioModal{{ all_images.index(bg_img) }}"
+                                                       style="background-image: url('/static/assets/images/board_background_img/bg_images/{{ bg_img }}');"></label>
+                                            {% endfor %}
+                                        </div>
+                                        <label class="sec-title">Attachment</label>
+                                        <div class="mb-3">
+                                            <input type="file" class="form-control" name="Card_Cover_Attachment">
+                                        </div>
+                                        <div class="card-action-dropdown-btn">
+                                            <button type="submit" class="btn btn-primary add-cover-btn"
+                                                    data-bs-dismiss="modal" name="card_cover">Add cover
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </li>
+
+                        <li class="action-title">Actions</li>
+
+                        <li>
+                            <div class="dropdown">
+                                <a class="btn btn-secondary action-btn" id="dropdownMenu" data-bs-toggle="dropdown"
+                                   type="button" aria-expanded="false" data-bs-target="#move-card">
+                                    <img src="/static/assets/svg-vector/move.svg" alt="">Move
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="move-card">
+                                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                                          method="post" enctype="multipart/form-data">
+                                        <p class="dropdown-title mx-auto my-2">Move Card</p>
+                                        <hr class="my-1">
+                                        <div class="mb-3">
+                                            <label for="">Select destination</label>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="browsers" class="form-label">Board</label>
+                                            <select id="boardMoveListSelect" name="Dest_Board_Move_Card"
+                                                    class="form-select board-select"
+                                                    onchange="changeBoardMoveCardOptions(this, {{ one_list.list_position }}, {{ one_card.card_position }})">
+                                                <option selected value="{{ one_board.board_id }}">
+                                                    {{ one_board.board_name }} (current)
+                                                </option>
+
+                                                {% for board in all_boards %}
+                                                    {% if board != one_board %}
+                                                        <option value="{{ board.board_id }}">{{ board.board_name }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3 list-select">
+                                            <label for="browsers" class="form-label">List</label>
+                                            <input type="hidden" name="Current_List_Id" value="{{ one_list.list_id }}">
+                                            <select id="listPositionSelect" class="form-select"
+                                                    name="Dest_List_Move_Card"
+                                                    onchange="changeListMoveCardOptions(this, {{ one_list.list_id }}, {{ one_card.card_position }})">
+                                                {% for list_ in all_lists %}
+                                                    {% if list_.parent_board_id == one_board.board_id %}
+                                                        {% if list_ == one_list %}
+                                                            <option selected value="
+                                                                    {{ list_.list_position }}{{ list_.list_id }}">
+                                                                {{ list_.list_position }} (current)
+                                                            </option>
+                                                        {% else %}
+                                                            <option value="
+                                                                    {{ list_.list_position }}{{ list_.list_id }}">
+                                                                {{ list_.list_position }}</option>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3 position-select">
+                                            <input type="hidden" name="Current_Card_Position"
+                                                   value="{{ one_card.card_position }}">
+                                            <label for="cardPositionSelect" class="form-label">Position</label>
+                                            <select id="cardPositionSelect" class="form-select"
+                                                    name="Dest_Position_Move_Card">
+                                                {% for card in all_cards %}
+                                                    {% if card.parent_list_id == one_list.list_id %}
+                                                        {% if card == one_card %}
+                                                            <option selected
+                                                                    value="{{ card.card_position }}">{{ card.card_position }}
+                                                                (current)
+                                                            </option>
+                                                        {% else %}
+                                                            <option value="{{ card.card_position }}">{{ card.card_position }}</option>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {#                            <option value="newPosition">New Position </option>#}
+                                            </select>
+                                        </div>
+                                        <div class="card-action-dropdown-btn">
+                                            <button data-bs-dismiss="modal" class="btn btn-primary"
+                                                    type="submit" name="move_card_form">Move
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+
+                        <li>
+                            <div class="dropdown">
+                                <a class="btn btn-secondary action-btn" id="dropdownMenu" data-bs-toggle="dropdown"
+                                   type="button" aria-expanded="false" data-bs-target="#copy-card">
+                                    <img src="/static/assets/svg-vector/copy.svg" alt="">Copy
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="copy-card">
+                                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                                          method="post" enctype="multipart/form-data">
+                                        <p class="dropdown-title mx-auto my-2">Copy Card</p>
+                                        <hr class="my-1">
+                                        <label class="form-label" for="card-name-edit">Name</label>
+                                        <div class="mb-3">
+                                            <input class="form-control" id="card-name-edit" type="text" name="Card_Name"
+                                                   value="{{ one_card.card_name }}">
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="">Select destination</label>
+                                        </div>
+
+                                        <div class="mb-3">
+                                            <label for="boardMoveListSelectCopy" class="form-label">Board</label>
+                                            <select id="boardMoveListSelectCopy" name="Dest_Board_Copy_Card"
+                                                    class="form-select board-select"
+                                                    onchange="changeBoardCopyCardOptions(this, {{ one_list.list_position }}, {{ one_card.card_position }})">
+                                                <option selected value="{{ one_board.board_id }}">
+                                                    {{ one_board.board_name }} (current)
+                                                </option>
+
+                                                {% for board in all_boards %}
+                                                    {% if board != one_board %}
+                                                        <option value="{{ board.board_id }}">{{ board.board_name }}</option>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3 list-select">
+                                            <label for="listPositionSelectCopy" class="form-label">List</label>
+                                            <input type="hidden" name="Current_List_Id" value="{{ one_list.list_id }}">
+                                            <select id="listPositionSelectCopy" class="form-select"
+                                                    name="Dest_List_Copy_Card"
+                                                    onchange="changeListCopyCardOptions(this, {{ one_list.list_id }}, {{ one_card.card_position }})">
+                                                {% for list_ in all_lists %}
+                                                    {% if list_.parent_board_id == one_board.board_id %}
+                                                        {% if list_ == one_list %}
+                                                            <option selected value="
+                                                                    {{ list_.list_position }}{{ list_.list_id }}">
+                                                                {{ list_.list_position }} (current)
+                                                            </option>
+                                                        {% else %}
+                                                            <option value="
+                                                                    {{ list_.list_position }}{{ list_.list_id }}">
+                                                                {{ list_.list_position }}</option>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3 position-select">
+                                            <input type="hidden" name="Current_Card_Position"
+                                                   value="{{ one_card.card_position }}">
+                                            <label for="cardPositionSelectCopy" class="form-label">Position</label>
+                                            <select id="cardPositionSelectCopy" class="form-select"
+                                                    name="Dest_Position_Copy_Card">
+                                                {% for card in all_cards %}
+                                                    {% if card.parent_list_id == one_list.list_id %}
+                                                        {% if card == one_card %}
+                                                            <option selected
+                                                                    value="{{ card.card_position }}">{{ card.card_position }}
+                                                                (current)
+                                                            </option>
+                                                        {% else %}
+                                                            <option value="{{ card.card_position }}">{{ card.card_position }}</option>
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {#                            <option value="newPosition">New Position </option>#}
+                                            </select>
+                                        </div>
+                                        <div class="card-action-dropdown-btn">
+                                            <button data-bs-dismiss="modal" class="btn btn-primary copy-card-btn"
+                                                    type="submit"
+                                                    name="copy_card_form">Copy
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                        </li>
+
+                        <li>
+                            <div class="dropdown">
+                                <a class="btn btn-secondary action-btn" id="dropdownMenu" data-bs-toggle="dropdown"
+                                   type="button" aria-expanded="false" data-bs-target="#delete-card">
+                                    <img src="/static/assets/svg-vector/archive.svg" alt="">Delete Card
+                                </a>
+                                <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="delete-card">
+                                    <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                                          method="post" enctype="multipart/form-data">
+                                        <p class="dropdown-title mx-auto my-2">Delete Card</p>
+                                        <hr class="my-1">
+                                        <p>Deleting a card is permanent. There is no undo.</p>
+                                        <div class="card-action-dropdown-btn">
+                                            <button data-bs-dismiss="modal" name="delete_card" type="submit"
+                                                    class="btn btn-danger delete-card-modal-btn">Delete
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+
+<section id="board-main-page">
+
+    <ol id="board-row">
+
+        {% for list in all_lists %}
+            {% if list.parent_board_id == one_board.board_id %}
+                <li>
+                    <div class="list-container">
+                        <div id="idListBtn{{ list.list_id }}">
+                            <div class="list-heading hide-toggle">
+                                <div class="list-name">
+                                    <div class="list-name-title"
+                                         onclick="showHideListForm('#idListBtn{{ list.list_id }}',
+                                                 '#idListForm{{ list.list_id }}')">
+                                        {{ list.list_name }}
+                                    </div>
+
+                                </div>
+
+                                <div class="dropdown-menu-end">
+                                    <a data-bs-auto-close="outside" role="button" class="menu-icon-link"
+                                       data-bs-toggle="dropdown"
+                                       aria-expanded="false">
+                                        <img class="menu-icon" src="/static/assets/svg-vector/menu.svg"
+                                             alt="">
+                                    </a>
+                                    <div class="dropdown-menu list-menubar">
+                                        <h5 class="list-menubar-header">List actions</h5>
+                                        <hr>
+                                        <ul>
+                                            <li>
+                                                <button class="btn btn-light" href="#"
+                                                        onclick="showHide('.add-card-toggle', '.add-card-form')"
+                                                        data-bs-dismiss="modal">Add card
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <div class="dropend">
+                                                    <button class="btn btn-light" href="#"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false">Move list
+                                                    </button>
+                                                    <div class="dropdown-menu"
+                                                         style="background: transparent;">
+                                                        <div class="list-dropdown-submenu">
+                                                            <h5 class="move-list-header">Move list</h5>
+                                                            <hr>
+                                                            <form action="{{ url_for('board', board_id=one_board.board_id) }}"
+                                                                  method="post" enctype="multipart/form-data">
+                                                                <div class="mb-3">
+                                                                    <label for="">Select destination</label>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <label for="boardMoveListSelect"
+                                                                           class="form-label">Board</label>
+                                                                    <select id="boardMoveListSelect"
+                                                                            onchange="changeListOptions(this, {{ list.list_position }}, {{ list.list_id }})"
+                                                                            name="Dest_Board_Move_List"
+                                                                            class="form-select board-select"
+                                                                            aria-label="Default select example">
+                                                                        <option selected
+                                                                                value="{{ one_board.board_id }}">
+                                                                            {{ one_board.board_name }}
+                                                                            (current)
+                                                                        </option>
+                                                                        {% for board in all_boards %}
+                                                                            {% if board != one_board %}
+                                                                                <option value="{{ board.board_id }}">
+                                                                                    {{ board.board_name }}</option>
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
+
+                                                                <div class="mb-3">
+                                                                    <label for="listPositionSelect"
+                                                                           class="form-label">Position</label>
+                                                                    <input type="hidden"
+                                                                           name="Current_List_Position"
+                                                                           value="{{ list.list_position }}">
+                                                                    <select id="listPositionSelect{{ list.list_id }}"
+                                                                            class="form-select"
+                                                                            aria-label="Default select example"
+                                                                            name="Dest_Position_Move_List">
+                                                                        {% for list_ in all_lists %}
+                                                                            {% if list_.parent_board_id == one_board.board_id %}
+                                                                                {% if list_ == list %}
+                                                                                    <option selected
+                                                                                            value="{{ list_.list_position }}">
+                                                                                        {{ list_.list_position }}
+                                                                                        (current)
+                                                                                    </option>
+                                                                                {% else %}
+                                                                                    <option value="{{ list_.list_position }}">
+                                                                                        {{ list_.list_position }}</option>
+                                                                                {% endif %}
+                                                                            {% endif %}
+                                                                        {% endfor %}
+                                                                    </select>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <button data-bs-dismiss="modal"
+                                                                            name="move_list_form"
+                                                                            class="btn btn-primary move-list-btn"
+                                                                            type="submit">Move
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li>
+                                                <div class="dropend">
+                                                    <button class="btn btn-light" href="#"
+                                                            data-bs-toggle="dropdown"
+                                                            aria-expanded="false">Copy list
+                                                    </button>
+                                                    <div class="dropdown-menu"
+                                                         style="background: transparent;">
+                                                        <div class="list-dropdown-submenu">
+                                                            <h5 class="move-list-header">Copy list</h5>
+                                                            <hr>
+                                                            <form action="{{ url_for('board', board_id=one_board.board_id) }}"
+                                                                  method="post"
+                                                                  enctype="multipart/form-data">
+                                                                <div class="mb-3">
+                                                                    <label for="">Name</label>
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <input type="hidden"
+                                                                           name="Current_List_Id"
+                                                                           value="{{ list.list_id }}">
+                                                                    <input type="hidden"
+                                                                           name="Current_List_Position"
+                                                                           value="{{ list.list_position }}">
+                                                                    <input required maxlength="30"
+                                                                           type="text"
+                                                                           class="form-control"
+                                                                           name="List_Name_Copy"
+                                                                           value="{{ list.list_name }}">
+                                                                </div>
+                                                                <div class="mb-3">
+                                                                    <button data-bs-dismiss="modal"
+                                                                            name="copy_list_form"
+                                                                            class="btn btn-primary move-list-btn"
+                                                                            type="submit">Copy list
+                                                                    </button>
+                                                                </div>
+                                                            </form>
+
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <form class="list-name-edit-form hide-toggle" id="idListForm{{ list.list_id }}"
+                              method="post"
+                              action="{{ url_for('board', board_id=one_board.board_id) }}"
+                              enctype="multipart/form-data">
+
+                            <div class="mb-3">
+                                <input type="text" name="List_Name_Edit" class="form-control"
+                                       value="{{ list.list_name }}">
+                            </div>
+                            <input type="hidden" name="List_Id" value="{{ list.list_id }}">
+                            <button name="list_name_edit_form" type="submit" class="btn btn-primary">
+                                save
+                            </button>
+                            <button type="button" class="btn btn-primary" name="edit_list"
+                                    onclick="showHideListForm('#idListBtn{{ list.list_id }}',
+                                            '#idListForm{{ list.list_id }}')">cancel
+                            </button>
+                        </form>
+
+
+                        <ol id="all-cards">
+                            {% for card in all_cards %}
+                                {% if card.parent_list_id == list.list_id %}
+                                    <li>
+                                        <a data-bs-toggle="modal" href='#edit-card{{ card.card_id }}'
+                                           role="button" aria-controls="edit-card">
+                                            <div class="shadow-sm bg-white card">
+                                                <img class="cover-img" src="{{ card.card_cover }}" alt="">
+                                                <div class="card-body">
+                                                    <p class="card-title">{{ card.card_name }}</p>
+                                                    <div class="card-text">
+                                                        {% if card.card_dueDate %}
+                                                            <div><img
+                                                                    src="/static/assets/svg-vector/clock.svg"
+                                                                    alt="">{{ card.card_dueDate.strftime('%b %d') }}
+                                                            </div>
+                                                        {% endif %}
+                                                        {% if card.card_description %}
+                                                            <div>
+                                                                <img src="/static/assets/svg-vector/description.svg"
+                                                                     alt="">
+                                                            </div>
+                                                        {% endif %}
+
+                                                        {% set count = namespace(value=0) %}
+
+                                                        {% for attachment in all_attachments %}
+                                                            {% if attachment.parent_card_id == card.card_id %}
+                                                                {% set count.value = count.value + 1 %}
+                                                            {% endif %}
+                                                        {% endfor %}
+                                                        {% if count.value > 0 %}
+                                                            <div>
+                                                                <img src="/static/assets/svg-vector/attachment.svg"
+                                                                     alt="">{{ count.value }}
+                                                            </div>
+                                                        {% endif %}
+                                                        {% if all_checklistItems %}
+                                                            <div>
+                                                                <img src="/static/assets/svg-vector/checkbox.svg"
+                                                                     alt="">1/3
+                                                            </div>
+                                                        {% endif %}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </a>
+                                    </li>
+
+                                {% endif %}
+                            {% endfor %}
+
+                            <li>
+                                <div class="add-card-form hide-toggle"
+                                     id="idCardForm{{ list.list_id }}">
+                                    <form class="signup-form"
+                                          action="{{ url_for('board', board_id=one_board.board_id) }}"
+                                          method="post" enctype="multipart/form-data">
+                                        <label class="add-card-form-input">
+                                        <textarea name="Card_Name" style="resize: none;" class="form-control"
+                                                  placeholder="Enter a name for this card..." rows="2"></textarea>
+                                        </label>
+                                        <input type="hidden" name="List_Id" value="{{ list.list_id }}">
+                                        <button type="submit" name="add_card"
+                                                class="btn btn-primary add-card-form-btn">
+                                            Add card
+                                        </button>
+                                        <a href="#" type="button" class="close-btn-form-card"
+                                           onclick="showHideListForm('#idCardBtn{{ list.list_id }}',
+                                                   '#idCardForm{{ list.list_id }}')">
+                                            <div><img src="/static/assets/svg-vector/close-button.svg"
+                                                      alt=""></div>
+                                        </a>
+                                    </form>
+                                </div>
+                            </li>
+                        </ol>
+
+
+                        {# Add a Card btn #}
+                        <a href="#"
+                           onclick="showHideListForm('#idCardBtn{{ list.list_id }}', '#idCardForm{{ list.list_id }}')"
+                           class="add-card-toggle"
+                           id="idCardBtn{{ list.list_id }}">
+                            <div class="add-card-btn">
+                                <img class="plus-sign-icon"
+                                     src="/static/assets/svg-vector/plus-sign-black.svg" alt="">
+                                Add a card
+                                <img class="card-icon " src="/static/assets/svg-vector/card-icon.svg"
+                                     alt="">
+                            </div>
+                        </a>
+                    </div>
+                </li>
+            {% endif %}
+        {% endfor %}
+
+        <li>
+            <a href="#" onclick="showHide('.add-btn-toggle', '.add-list-form')" class="add-btn-toggle">
+                <div class="add-btn">
+                    <img class="plus-sign-icon" src="/static/assets/svg-vector/plus-sign.svg" alt="">
+                    Add a list
+                </div>
+            </a>
+        </li>
+
+        <li>
+            <div class="add-list-form hide-toggle">
+
+                <form class="signup-form" action="{{ url_for('board', board_id=one_board.board_id) }}"
+                      method="post"
+                      enctype="multipart/form-data">
+                    <label>
+                        <input required maxlength="30" name="List_Name" type="text"
+                               class="form-control add-list-input"
+                               placeholder="Enter list name...">
+                    </label>
+                    <button name="add_list" type="submit"
+                            class="btn btn-primary add-list-form-btn">Add list
+                    </button>
+
+                    <a href="#" type="button" onclick="showHide('.add-btn-toggle', '.add-list-form')"
+                       class="close-btn-form-card">
+                        <div>
+                            <img src="/static/assets/svg-vector/close-button.svg" alt="">
+                        </div>
+                    </a>
+                </form>
+            </div>
+        </li>
+    </ol>
+</section>
+
+
+{# Delete Attachment #}
+
+<div class="modal fade delete-attachment-modal" id="delete-attach" data-bs-keyboard="false"
+     tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Delete attachment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                      method="post" enctype="multipart/form-data">
+                    <input class='modal-body-input' type="hidden" name="attachment_id"
+                           value="">
+                    <p>Deleting an attachment is permanent. There is no undo.</p>
+                    <button data-bs-dismiss="modal" name="delete_card_attachment"
+                            class="btn btn-danger delete-attachment-modal-btn" type="submit">Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Delete Checklist #}
+
+<div class="modal fade" id="delete-checklist" data-bs-keyboard="false" tabindex="-1"
+     aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="staticBackdropLabel">Delete checklist</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('card', id_=one_board.board_id, card_id=one_card.card_id) }}"
+                      method="post" enctype="multipart/form-data">
+                    <input type="hidden" name="delete_checklist">
+                    <p>Deleting a checklist is permanent. There is no undo.</p>
+                    <button data-bs-dismiss="modal" class="btn btn-danger delete-checklist-modal-btn"
+                            type="submit">Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    {% if one_card.card_description %}
+        let a = '{{ one_card.card_description|safe }}';
+    {% else %}
+        let a = null;
+    {% endif %}
+
+    function writeDesc() {
+        CKEDITOR.instances["ckeditor"].setData(a);
+        document.getElementById("div").classList.toggle('hide-toggle');
+        document.getElementById("textbox").classList.toggle('hide-toggle');
+    }
+
+    function cancelTextbox() {
+
+        if (a === null) {
+            console.log('true');
+            writeDesc();
+        } else {
+            console.log('false');
+            editBtn();
+        }
+    }
+
+    function saveTextbox() {
+        console.log(CKEDITOR.instances['ckeditor'].getData());
+        if (CKEDITOR.instances['ckeditor'].getData() === '') {
+            document.forms['form1'].submit();
+            writeDesc();
+        } else {
+            submitData();
+        }
+    }
+
+    function submitData() {
+        if (a) {
+            document.getElementById('card-desc-text').classList.toggle('hide-toggle');
+        }
+        document.getElementById("textbox").classList.toggle('hide-toggle');
+        document.forms['form1'].submit();
+    }
+
+    function editBtn() {
+        document.getElementById('card-desc-text').classList.toggle('hide-toggle');
+        CKEDITOR.instances["ckeditor"].setData(a);
+        document.getElementById('editBtn').classList.toggle('hide-toggle');
+        document.getElementById('textbox').classList.toggle('hide-toggle');
+
+    }
+</script>
+
+
+<script>
+
+    let deleteAttachmentModal = document.getElementById('delete-attach');
+
+    deleteAttachmentModal.addEventListener('show.bs.modal', function (event) {
+        let button = event.relatedTarget
+        let attachmentId = button.getAttribute('value');
+
+        let modalBodyInput = deleteAttachmentModal.querySelector('.modal-body-input');
+        modalBodyInput.value = attachmentId;
+    });
+</script>
+
+<script>
+
+    let displaySelectors = document.getElementsByClassName('display-selector');
+    {#let displayDivModal = document.getElementById('board-bg-display-modal')#}
+    {#let displayDiv = document.getElementById('board-bg-display');#}
+    {#let displaySelectors = #}
+
+    for (let i = 0; i < displaySelectors.length; i++) {
+        displaySelectors[i].addEventListener('click', function () {
+            {#let selectorSRC = displaySelectors[i].style.backgroundImage.slice(4, -1).replace(/"/g, "")#}
+            for (let j = 0; j < displaySelectors.length; j++) {
+                displaySelectors[j].style.border = "1px solid white";
+                displaySelectors[j].style.boxShadow = 'none';
+            }
+            displaySelectors[i].style.border = "2px solid #86b7fe";
+            displaySelectors[i].style.boxShadow = "0 0 0 .25rem rgba(13, 110, 253, .25)";
+        });
+    }
+</script>
+
+<script>
+    function changeBoardMoveCardOptions(chooser, listPosition, cardPosition) {
+        let selectedBoardOption = (chooser.options[chooser.selectedIndex].value);
+
+        {# empty options form child #}
+        let listOptions = document.getElementById('listPositionSelect')
+        listOptions.options.length = 0;
+
+        {# empty options form child #}
+        let cardOptions = document.getElementById('cardPositionSelect')
+        cardOptions.options.length = 0;
+
+        {#check for selected_board_id is equal to list.parent_board_id#}
+        {# check if selected is current board if yes check for if listposition is equal to #}
+        {% for list in all_lists %}
+            if (selectedBoardOption == {{ list.parent_board_id }}) {
+
+                {# if it is current board #}
+                if (selectedBoardOption == {{ one_board.board_id }}) {
+                    if ({{ list.list_position }} == listPosition) {
+                        listOptions.options[listOptions.options.length] =
+                            new Option({{ list.list_position }} + '(current)', '{{ list.list_position }}{{ list.list_id }}', true, true);
+
+                        {% for card in all_cards %}
+                            if ({{ card.parent_list_id }} == {{ list.list_id }}) {
+                                if ({{ card.card_position }} == cardPosition) {
+                                    cardOptions.options[cardOptions.options.length] =
+                                        new Option({{ card.card_position }} + '(current)', {{ card.card_position }},
+                                            true, true);
+
+                                } else {
+                                    cardOptions.options[cardOptions.options.length] =
+                                        new Option({{ card.card_position }}, {{ card.card_position }});
+
+                                }
+                            }
+
+                        {% endfor %}
+
+
+                    } else {
+                        listOptions.options[listOptions.options.length] =
+                            new Option({{ list.list_position }}, '{{ list.list_position }}{{ list.list_id }}');
+                    }
+                } else {
+                    listOptions.options[listOptions.options.length] =
+                        new Option({{ list.list_position }}, '{{ list.list_position }}{{ list.list_id }}');
+
+                    if ({{ list.list_position }} == 1) {
+                        {% for card in all_cards %}
+                            if ({{ card.parent_list_id }} == {{ list.list_id }}) {
+                                cardOptions.options[cardOptions.options.length] =
+                                    new Option({{ card.card_position }}, {{ card.card_position }});
+                            }
+                        {% endfor %}
+                        cardOptions.options[cardOptions.options.length] = new Option('New Position ', 'newPosition');
+
+                    }
+
+                }
+            }
+
+        {% endfor %}
+        {# fill the card dropdown with card parent list id is equal to first position list id of the chosen board #}
+
+
+    }
+
+    function changeListMoveCardOptions(chooser, currentListId, currentCardPosition) {
+
+        let selectedListOption = (chooser.options[chooser.selectedIndex].value);
+        selectedListOption = selectedListOption.slice(1)
+
+
+        {# empty options form child #}
+        let cardOptions = document.getElementById('cardPositionSelect');
+        cardOptions.options.length = 0;
+
+        {% for card in all_cards %}
+            console.log({{ card.parent_list_id }}, selectedListOption)
+            if ({{ card.parent_list_id }} == selectedListOption) {
+                if (currentListId == selectedListOption) {
+                    if ({{ card.card_position }} == currentCardPosition) {
+                        cardOptions.options[cardOptions.options.length] =
+                            new Option({{ card.card_position }} + '(current)', {{ card.card_position }});
+                    } else {
+                        cardOptions.options[cardOptions.options.length] =
+                            new Option({{ card.card_position }}, {{ card.card_position }});
+                    }
+
+                } else {
+                    cardOptions.options[cardOptions.options.length] =
+                        new Option({{ card.card_position }}, {{ card.card_position }});
+                }
+
+            }
+        {% endfor %}
+        if (currentListId != selectedListOption) {
+            cardOptions.options[cardOptions.options.length] = new Option('New Position ', 'newPosition');
+        }
+
+    }
+
+</script>
+
+<script>
+    function changeBoardCopyCardOptions(chooser, listPosition, cardPosition) {
+        let selectedBoardOption = (chooser.options[chooser.selectedIndex].value);
+
+        {# empty options form child #}
+        let listOptions = document.getElementById('listPositionSelectCopy')
+        listOptions.options.length = 0;
+
+        {# empty options form child #}
+        let cardOptions = document.getElementById('cardPositionSelectCopy')
+        cardOptions.options.length = 0;
+
+        {#check for selected_board_id is equal to list.parent_board_id#}
+        {# check if selected is current board if yes check for if listposition is equal to #}
+        {% for list in all_lists %}
+            if (selectedBoardOption == {{ list.parent_board_id }}) {
+
+                {# if it is current board #}
+                if (selectedBoardOption == {{ one_board.board_id }}) {
+                    if ({{ list.list_position }} == listPosition) {
+                        listOptions.options[listOptions.options.length] =
+                            new Option({{ list.list_position }} + '(current)', '{{ list.list_position }}{{ list.list_id }}', true, true);
+
+                        {% for card in all_cards %}
+                            if ({{ card.parent_list_id }} == {{ list.list_id }}) {
+                                if ({{ card.card_position }} == cardPosition) {
+                                    cardOptions.options[cardOptions.options.length] =
+                                        new Option({{ card.card_position }} + '(current)', {{ card.card_position }},
+                                            true, true);
+
+                                } else {
+                                    cardOptions.options[cardOptions.options.length] =
+                                        new Option({{ card.card_position }}, {{ card.card_position }});
+
+                                }
+                            }
+
+                        {% endfor %}
+
+
+                    } else {
+                        listOptions.options[listOptions.options.length] =
+                            new Option({{ list.list_position }}, '{{ list.list_position }}{{ list.list_id }}');
+                    }
+                } else {
+                    listOptions.options[listOptions.options.length] =
+                        new Option({{ list.list_position }}, '{{ list.list_position }}{{ list.list_id }}');
+
+                    if ({{ list.list_position }} == 1) {
+                        {% for card in all_cards %}
+                            if ({{ card.parent_list_id }} == {{ list.list_id }}) {
+                                cardOptions.options[cardOptions.options.length] =
+                                    new Option({{ card.card_position }}, {{ card.card_position }});
+                            }
+                        {% endfor %}
+                        cardOptions.options[cardOptions.options.length] = new Option('New Position ', 'newPosition');
+
+                    }
+
+                }
+            }
+
+        {% endfor %}
+        {# fill the card dropdown with card parent list id is equal to first position list id of the chosen board #}
+
+
+    }
+
+    function changeListCopyCardOptions(chooser, currentListId, currentCardPosition) {
+
+        let selectedListOption = (chooser.options[chooser.selectedIndex].value);
+        selectedListOption = selectedListOption.slice(1)
+
+
+        {# empty options form child #}
+        let cardOptions = document.getElementById('cardPositionSelectCopy');
+        cardOptions.options.length = 0;
+
+        {% for card in all_cards %}
+            console.log({{ card.parent_list_id }}, selectedListOption)
+            if ({{ card.parent_list_id }} == selectedListOption) {
+                if (currentListId == selectedListOption) {
+                    if ({{ card.card_position }} == currentCardPosition) {
+                        cardOptions.options[cardOptions.options.length] =
+                            new Option({{ card.card_position }} + '(current)', {{ card.card_position }});
+                    } else {
+                        cardOptions.options[cardOptions.options.length] =
+                            new Option({{ card.card_position }}, {{ card.card_position }});
+                    }
+
+                } else {
+                    cardOptions.options[cardOptions.options.length] =
+                        new Option({{ card.card_position }}, {{ card.card_position }});
+                }
+
+            }
+        {% endfor %}
+        if (currentListId != selectedListOption) {
+            cardOptions.options[cardOptions.options.length] = new Option('New Position ', 'newPosition');
+        }
+
+    }
+
+</script>
+
+<script>
+    {#    {% for item in all_items %}#}
+    {#        {% if item.item_status %}#}
+    {#            document.getElementById('item-checkbox{{ item.item_id }}').checked = true;#}
+    {#        {% else %}#}
+    {#            document.getElementById('item-checkbox{{ item.item_id }}').checked = false;#}
+    {#        {% endif %}#}
+    {#    {% endfor %}#}
+    let checkboxes = document.getElementsByClassName('item');
+    {% for item in all_items %}
+        console.log({{ loop.index - 1 }})
+        checkboxes[{{ loop.index - 1 }}].addEventListener('click', function () {
+            console.log('hello{{ item.item_id }}')
+            submitForm({{ item.item_id }});
+        });
+    {% endfor %}
+
+    function submitForm(id) {
+        let rush = document.getElementById('checkbox-form' + id);
+        rush.submit()
+    }
+
+    {#for (let i = 0; i < checkboxes.length; i++) {#}
+
+</script>
+
+{#<script>#}
+{#    function updateItemCheckbox(item_id) {#}
+{#        let checkboxes = document.getElementsByClassName('item-checkbox');#}
+{#        let item = document.getElementsByClassName('checklist-item' + item_id);#}
+{##}
+{#        for (let a = 0; a < checkboxes.length; a++) {#}
+{#            if (checkboxes[a].checked == true) {#}
+{#                item.style.textDecoration = 'line-through';#}
+{#            } else {#}
+{#                item.style.textDecoration = 'none';#}
+{#            }#}
+{#        }#}
+{#    }#}
+{#</script>#}
+
+<script>
+    function changeListOptions(chooser, listPosition, listId) {
+        let selectedOption = (chooser.options[chooser.selectedIndex].value);
+
+        {# empty options form child #}
+        let listOptions = document.getElementById('listPositionSelect' + listId)
+        {#let listOptionsList = document.getElementsByClassName('listPositionSelect');#}
+        {#for (let listOptions of listOptionsList) {#}
+        listOptions.options.length = 0;
+
+        {#check for selectedboardid is equal to list.parent_board_id#}
+        {# check if selected is current board if yes check for if listposition is equal to #}
+        {% for list in all_lists %}
+            {# check if list is in selected board  #}
+            if ({{ list.parent_board_id }} == selectedOption) {
+                {# check if selected board is current board #}
+                if (selectedOption == {{ one_board.board_id }}) {
+                    {# if list position is current list position #}
+                    if ({{ list.list_position }} == listPosition) {
+                        listOptions.options[listOptions.options.length] =
+                            new Option({{ list.list_position }} + '(current)', {{ list.list_position }}, true, true);
+                    } else {
+                        listOptions.options[listOptions.options.length] =
+                            new Option({{ list.list_position }}, {{ list.list_position }});
+                    }
+                } else {
+                    listOptions.options[listOptions.options.length] =
+                        new Option({{ list.list_position }}, {{ list.list_position }});
+                }
+            }
+        {% endfor %}
+    }
+
+</script>
+
+<script>
+    function showHide(a, b) {
+        let btn = document.querySelector(a);
+        let div = document.querySelector(b);
+        for (let c in btn) {
+            c.classList.toggle('hide-toggle');
+        }
+        for (let d in div) {
+            d.classList.toggle('hide-toggle');
+        }
+    }
+
+    function showHideListForm(a, b) {
+        let addBtn = document.querySelector(a);
+        let addForm = document.querySelector(b);
+
+        addBtn.classList.toggle('hide-toggle');
+        addForm.classList.toggle('hide-toggle');
+    }
+
+    function popupMenu(c) {
+        let PopupDiv = document.querySelector(c);
+        PopupDiv.classList.toggle('hide-toggle');
+    }
+
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"
+        integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB"
+        crossorigin="anonymous">
+
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"
+        integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13"
+        crossorigin="anonymous">
+
+</script>
+
+</body>
