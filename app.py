@@ -70,7 +70,7 @@ app.config['CKEDITOR_PKG_TYPE'] = 'basic'
 ckeditor = CKEditor(app)
 
 # postgresql://{user-name}:{password}@{host}:{port-id}/{database-name}
-
+# postgresql://postgres:1234@localhost:5432/postgres
 # Secret key for flashes messages
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
