@@ -193,9 +193,6 @@
                     {% endfor %}
 
                     {% if a.value %}
-                        {#                        {% set a = all_attachments|selectattr("parent_card_id", one_card.card_id|string )|list %}#}
-                        {#                        {{ a }}#}
-                        {#                        we want to if there is only cover image in attachments#}
 
                         <div class="card-attachment me-auto">
                             <img src="/static/assets/svg-vector/attachment.svg" alt="">Attachment
@@ -1283,7 +1280,7 @@
         cardOptions.options.length = 0;
 
         {#check for selected_board_id is equal to list.parent_board_id#}
-        {# check if selected is current board if yes check for if listposition is equal to #}
+        {# check if selected is current board if yes check for if list_position is equal to #}
         {% for list in all_lists %}
             if (selectedBoardOption == {{ list.parent_board_id }}) {
 
@@ -1388,7 +1385,7 @@
         cardOptions.options.length = 0;
 
         {#check for selected_board_id is equal to list.parent_board_id#}
-        {# check if selected is current board if yes check for if listposition is equal to #}
+        {# check if selected is current board if yes check for if list_position is equal to #}
         {% for list in all_lists %}
             if (selectedBoardOption == {{ list.parent_board_id }}) {
 
@@ -1531,8 +1528,8 @@
         {#for (let listOptions of listOptionsList) {#}
         listOptions.options.length = 0;
 
-        {#check for selectedboardid is equal to list.parent_board_id#}
-        {# check if selected is current board if yes check for if listposition is equal to #}
+        {#check for selected_board_id is equal to list.parent_board_id#}
+        {# check if selected is current board if yes check for if list_position is equal to #}
         {% for list in all_lists %}
             {# check if list is in selected board  #}
             if ({{ list.parent_board_id }} == selectedOption) {
