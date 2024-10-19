@@ -15,27 +15,40 @@
                 <img src="/static/assets/svg-vector/back-icon.svg" alt="">
             </a>
         </div>
+
         <div class="mx-lg-3 mx-md-3 mx-sm-2 mx-1 board-favorite-btn">
-            <form action="{{ url_for('board', board_id=one_board.board_id) }}" method="post"
-                  enctype="multipart/form-data">
-                <input type="hidden" name="a">
-                {% if one_board.board_favorite %}
-                    <button href="" type="submit" role="button" name="favorite_btn">
-                        <img class="like-btn-icon" src="/static/assets/svg-vector/like-icon.svg" alt="">
-                    </button>
-                {% else %}
-                    <button href="" type="submit" role="button" name="favorite_btn">
-                        <img class="unlike-btn-icon" src="/static/assets/svg-vector/unlike-icon.svg" alt="">
-                    </button>
-                {% endif %}
-            </form>
-        </div>
-        <div class="board-name me-auto" onclick="showHide('.board-name', '.board-name-edit-form')">
-            <div class="nav-title">{{ one_board.board_name }}</div>
-            {% if one_board.is_template %}
-                <span class="template-text-board">Template</span>
+            {% if not one_board.is_template %}
+                <form action="{{ url_for('board', board_id=one_board.board_id) }}" method="post"
+                      enctype="multipart/form-data">
+                    {% if one_board.board_favorite %}
+                        <button href="" type="submit" role="button" name="favorite_btn">
+                            <img class="like-btn-icon" src="/static/assets/svg-vector/like-icon.svg" alt="">
+                        </button>
+                    {% else %}
+                        <button href="" type="submit" role="button" name="favorite_btn">
+                            <img class="unlike-btn-icon" src="/static/assets/svg-vector/unlike-icon.svg" alt="">
+                        </button>
+                    {% endif %}
+                </form>
             {% endif %}
         </div>
+
+        {% if user.id == 1 or user.id != 1 and not one_board.is_template %}
+            <div class="board-name me-auto" onclick="showHide('.board-name', '.board-name-edit-form')">
+                <div class="nav-title" type="button">{{ one_board.board_name }}</div>
+                {% if one_board.is_template %}
+                    <span class="template-text-board">Template</span>
+                {% endif %}
+            </div>
+        {% else %}
+            <div class="board-name me-auto">
+                <div class="nav-title">{{ one_board.board_name }}</div>
+                {% if one_board.is_template %}
+                    <span class="template-text-board">Template</span>
+                {% endif %}
+            </div>
+        {% endif %}
+
 
         <div class="board-name-edit-form hide-toggle">
             <form class="board-name-edit" action="{{ url_for('board', board_id=one_board.board_id) }}" method="post"
@@ -62,337 +75,450 @@
             <a href="#"><img class="filter-icon" src="/static/assets/svg-vector/filter.svg" alt="filter-icon">Filter</a>
         </div>
         <div class="change-bg-btn mx-lg-3 mx-md-2 mx-sm-1 mx-1">
-            <a type="button" href="#" data-bs-toggle="offcanvas" data-bs-target="#change-bg"
-               aria-controls="offcanvasRight">
-                <img class="change-bg-icon" src="/static/assets/svg-vector/change-background.svg"
-                     alt="change-background-icon">Background</a>
+            {% if user.id == 1 or user.id != 1 and not one_board.is_template %}
+                <a type="button" href="#" data-bs-toggle="offcanvas" data-bs-target="#change-bg"
+                   aria-controls="offcanvasRight">
+                    <img class="change-bg-icon" src="/static/assets/svg-vector/change-background.svg"
+                         alt="change-background-icon">Background
+                </a>
+            {% else %}
+                <a type="button" href="#" data-bs-toggle="offcanvas" data-bs-target="#change-bg"
+                   aria-controls="offcanvasRight" disabled>
+                    <img class="change-bg-icon" src="/static/assets/svg-vector/change-background.svg"
+                         alt="change-background-icon">Background
+                </a>
+            {% endif %}
+
         </div>
+
     </div>
+
+    {% if user.id != 1 and one_board.is_template %}
+        <div class="template-board-btn">
+            <img class="template-icon-img" src="/static/assets/svg-vector/template_kanban.svg" alt="">
+            <span>This is public template for anyone to copy</span>
+            <div class="dropdown">
+
+                <button class="btn btn-primary mx-4 my-2" id="dropdownMenu" data-bs-toggle="dropdown"
+                        aria-expanded="false" data-bs-target="#copy-template">create board form template
+                </button>
+
+                <div class="dropdown-menu" aria-labelledby="dropdownMenu" id="copy-template">
+                    <form action="{{ url_for('board', board_id=one_board.board_id) }}"
+                          method="post" enctype="multipart/form-data">
+                        <p class="dropdown-title mx-auto my-2">Copy template</p>
+                        <hr class="my-1">
+                        <div class="mb-2">
+                            <input type="hidden" name="Board_Id" value="{{ one_board.board_id }}">
+                            <label for="exampleInputEmail" class="form-label">Board title</label>
+                            <input required maxlength="11" type="text" name="Board_Name" class="form-control"
+                                   value="{{ one_board.board_name }}" id="exampleInputEmail" placeholder="Board name">
+                        </div>
+
+                        {% if (user.id == 1 and all_workspaces[1:]|count > 1) or all_workspaces|count > 1 %}
+                            <div class="mb-2">
+                                <label for="workspace-selector" class="form-label">Workspace</label>
+                                <select id="workspace-selector" name="Board_Workspace" class="form-select"
+                                        aria-label="Default select example">
+                                    {% if user.id == 1 %}
+                                        <option value="{{ all_workspaces[1].workspace_id }}"
+                                                selected>{{ all_workspaces[1].workspace_name }}</option>
+                                        {% for workspace in all_workspaces[2:] %}
+                                            <option value="{{ workspace.workspace_id }}">{{ workspace.workspace_name }}</option>
+                                        {% endfor %}
+                                    {% else %}
+                                        <option value="{{ all_workspaces[0].workspace_id }}"
+                                                selected>{{ all_workspaces[0].workspace_name }}</option>
+                                        {% for workspace in all_workspaces[1:] %}
+                                            <option value="{{ workspace.workspace_id }}">{{ workspace.workspace_name }}</option>
+                                        {% endfor %}
+                                    {% endif %}
+                                </select>
+                            </div>
+
+                        {% endif %}
+
+                        <div id="signup-btn">
+                            <button name="copy_template" type="submit" class="btn btn-primary my-3">Create</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    {% endif %}
 
 </div>
 
-
 <section id="board-main-page">
 
-    <ol id="board-row">
+    {% if user.id != 1 and one_board.is_template %}
+        <ol id="board-row" style="top: 7.375rem; z-index: -1;">
+    {% else %}
+        <ol id="board-row">
+    {% endif %}
 
-        {% for list in all_lists %}
-            {% if list.parent_board_id == one_board.board_id %}
-                <li>
+    {% for list in all_lists %}
+        {% if list.parent_board_id == one_board.board_id %}
+            <li>
+                {% if user.id != 1 and one_board.is_template %}
+                    <div class="list-container" style="max-height: 31.25rem;">
+                {% else %}
                     <div class="list-container">
-                        <div id="idListBtn{{ list.list_id }}">
-                            <div class="list-heading hide-toggle">
-                                <div class="list-name">
-                                    <div class="list-name-title"
-                                         onclick="showHideListForm('#idListBtn{{ list.list_id }}',
-                                                 '#idListForm{{ list.list_id }}')">
-                                        {{ list.list_name }}
-                                    </div>
+                {% endif %}
 
+                <div id="idListBtn{{ list.list_id }}">
+                    <div class="list-heading hide-toggle">
+                        <div class="list-name">
+                            {% if user.id == 1 or user.id != 1 and not one_board.is_template %}
+                                <div class="list-name-title"
+                                     onclick="showHideListForm('#idListBtn{{ list.list_id }}',
+                                             '#idListForm{{ list.list_id }}')">
+                                    {{ list.list_name }}
                                 </div>
-
-                                <div class="dropdown-menu-end">
-                                    <a data-bs-auto-close="outside" role="button" class="menu-icon-link"
-                                       data-bs-toggle="dropdown"
-                                       aria-expanded="false">
-                                        <img class="menu-icon" src="/static/assets/svg-vector/menu.svg" alt="">
-                                    </a>
-                                    <div class="dropdown-menu list-menubar">
-                                        <h5 class="list-menubar-header">List actions</h5>
-                                        <hr>
-                                        <ul>
-                                            <li>
-                                                <button class="btn btn-light" href="#"
-                                                        onclick="showHide('.add-card-toggle', '.add-card-form')"
-                                                        data-bs-dismiss="modal">Add card
-                                                </button>
-                                            </li>
-                                            <li>
-                                                <div class="dropend">
-                                                    <button class="btn btn-light" href="#" data-bs-toggle="dropdown"
-                                                            aria-expanded="false">Move list
-                                                    </button>
-                                                    <div class="dropdown-menu" style="background: transparent;">
-                                                        <div class="list-dropdown-submenu">
-                                                            <h5 class="move-list-header">Move list</h5>
-                                                            <hr>
-                                                            <form action="{{ url_for('board', board_id=one_board.board_id) }}"
-                                                                  method="post" enctype="multipart/form-data">
-                                                                <div class="mb-3">
-                                                                    <label for="">Select destination</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <label for="boardMoveListSelect"
-                                                                           class="form-label">Board</label>
-                                                                    <select id="boardMoveListSelect"
-                                                                            onchange="changeListOptions(this, {{ list.list_position }}, {{ list.list_id }})"
-                                                                            name="Dest_Board_Move_List"
-                                                                            class="form-select board-select"
-                                                                            aria-label="Default select example">
-                                                                        <option selected
-                                                                                value="{{ one_board.board_id }}">
-                                                                            {{ one_board.board_name }} (current)
-                                                                        </option>
-                                                                        {% for board in all_boards %}
-                                                                            {% if board != one_board %}
-                                                                                <option value="{{ board.board_id }}">
-                                                                                    {{ board.board_name }}</option>
-                                                                            {% endif %}
-                                                                        {% endfor %}
-                                                                    </select>
-                                                                </div>
-
-                                                                <div class="mb-3">
-                                                                    <label for="listPositionSelect"
-                                                                           class="form-label">Position</label>
-                                                                    <input type="hidden" name="Current_List_Position"
-                                                                           value="{{ list.list_position }}">
-                                                                    <select id="listPositionSelect{{ list.list_id }}"
-                                                                            class="form-select"
-                                                                            aria-label="Default select example"
-                                                                            name="Dest_Position_Move_List">
-                                                                        {% for list_ in all_lists %}
-                                                                            {% if list_.parent_board_id == one_board.board_id %}
-                                                                                {% if list_ == list %}
-                                                                                    <option selected
-                                                                                            value="{{ list_.list_position }}">
-                                                                                        {{ list_.list_position }}
-                                                                                        (current)
-                                                                                    </option>
-                                                                                {% else %}
-                                                                                    <option value="{{ list_.list_position }}">
-                                                                                        {{ list_.list_position }}</option>
-                                                                                {% endif %}
-                                                                            {% endif %}
-                                                                        {% endfor %}
-                                                                    </select>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <button data-bs-dismiss="modal"
-                                                                            name="move_list_form"
-                                                                            class="btn btn-primary move-list-btn"
-                                                                            type="submit">Move
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <div class="dropend">
-                                                    <button class="btn btn-light" href="#" data-bs-toggle="dropdown"
-                                                            aria-expanded="false">Copy list
-                                                    </button>
-                                                    <div class="dropdown-menu" style="background: transparent;">
-                                                        <div class="list-dropdown-submenu">
-                                                            <h5 class="move-list-header">Copy list</h5>
-                                                            <hr>
-                                                            <form action="{{ url_for('board', board_id=one_board.board_id) }}"
-                                                                  method="post" enctype="multipart/form-data">
-                                                                <div class="mb-3">
-                                                                    <label for="">Name</label>
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <input type="hidden" name="Current_List_Id"
-                                                                           value="{{ list.list_id }}">
-                                                                    <input type="hidden" name="Current_List_Position"
-                                                                           value="{{ list.list_position }}">
-                                                                    <input required maxlength="30" type="text"
-                                                                           class="form-control" name="List_Name_Copy"
-                                                                           value="{{ list.list_name }}">
-                                                                </div>
-                                                                <div class="mb-3">
-                                                                    <button data-bs-dismiss="modal"
-                                                                            name="copy_list_form"
-                                                                            class="btn btn-primary move-list-btn"
-                                                                            type="submit">Copy list
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                            <li>
-                                                <div class="dropend">
-                                                    <button class="btn btn-light" href="#" data-bs-toggle="dropdown"
-                                                            aria-expanded="false">Delete list
-                                                    </button>
-                                                    <div class="dropdown-menu" style="background: transparent;">
-                                                        <div class="list-dropdown-submenu">
-                                                            <h5 class="move-list-header">Delete list</h5>
-                                                            <hr>
-                                                            <form action="{{ url_for('board', board_id=one_board.board_id) }}"
-                                                                  method="post" enctype="multipart/form-data">
-                                                                <input type="hidden" name="Current_List_Id"
-                                                                       value="{{ list.list_id }}">
-                                                                <div class="mb-3">
-                                                                    <label for="">Deleting a list is permanent. There is
-                                                                        no undo.</label>
-                                                                </div>
-
-                                                                <div class="mb-3">
-                                                                    <button name="delete_list_form"
-                                                                            class="btn btn-danger move-list-btn"
-                                                                            type="submit">Delete
-                                                                    </button>
-                                                                </div>
-                                                            </form>
-
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </li>
-                                        </ul>
-                                    </div>
+                            {% else %}
+                                <div class="list-name-title">
+                                    {{ list.list_name }}
                                 </div>
+                            {% endif %}
 
+                        </div>
+
+                        <div class="dropdown-menu-end">
+                            {% if user.id == 1 or user.id != 1 and not one_board.is_template %}
+                                <a data-bs-auto-close="outside" role="button" class="menu-icon-link"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+                                    <img class="menu-icon" src="/static/assets/svg-vector/menu.svg" alt="">
+                                </a>
+                                {#                                    {% else %}#}
+                                {#                                        <a role="button" class="menu-icon-link">#}
+                                {#                                            <img class="menu-icon" src="/static/assets/svg-vector/menu.svg" alt="">#}
+                                {#                                        </a>#}
+                            {% endif %}
+                            <div class="dropdown-menu list-menubar">
+                                <h5 class="list-menubar-header">List actions</h5>
+                                <hr>
+                                <ul>
+                                    <li>
+                                        <button class="btn btn-light" href="#"
+                                                onclick="showHide('.add-card-toggle', '.add-card-form')"
+                                                data-bs-dismiss="modal">Add card
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <div class="dropend">
+                                            <button class="btn btn-light" href="#" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">Move list
+                                            </button>
+                                            <div class="dropdown-menu" style="background: transparent;">
+                                                <div class="list-dropdown-submenu">
+                                                    <h5 class="move-list-header">Move list</h5>
+                                                    <hr>
+                                                    <form action="{{ url_for('board', board_id=one_board.board_id) }}"
+                                                          method="post" enctype="multipart/form-data">
+                                                        <div class="mb-3">
+                                                            <label for="">Select destination</label>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <label for="boardMoveListSelect"
+                                                                   class="form-label">Board</label>
+                                                            <select id="boardMoveListSelect"
+                                                                    onchange="changeListOptions(this, {{ list.list_position }}, {{ list.list_id }})"
+                                                                    name="Dest_Board_Move_List"
+                                                                    class="form-select board-select"
+                                                                    aria-label="Default select example">
+                                                                <option selected
+                                                                        value="{{ one_board.board_id }}">
+                                                                    {{ one_board.board_name }} (current)
+                                                                </option>
+                                                                {% for board in all_boards %}
+                                                                    {% if board != one_board %}
+                                                                        <option value="{{ board.board_id }}">
+                                                                            {{ board.board_name }}</option>
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <label for="listPositionSelect"
+                                                                   class="form-label">Position</label>
+                                                            <input type="hidden" name="Current_List_Position"
+                                                                   value="{{ list.list_position }}">
+                                                            <select id="listPositionSelect{{ list.list_id }}"
+                                                                    class="form-select"
+                                                                    aria-label="Default select example"
+                                                                    name="Dest_Position_Move_List">
+                                                                {% for list_ in all_lists %}
+                                                                    {% if list_.parent_board_id == one_board.board_id %}
+                                                                        {% if list_ == list %}
+                                                                            <option selected
+                                                                                    value="{{ list_.list_position }}">
+                                                                                {{ list_.list_position }}
+                                                                                (current)
+                                                                            </option>
+                                                                        {% else %}
+                                                                            <option value="{{ list_.list_position }}">
+                                                                                {{ list_.list_position }}</option>
+                                                                        {% endif %}
+                                                                    {% endif %}
+                                                                {% endfor %}
+                                                            </select>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <button data-bs-dismiss="modal" name="move_list_form"
+                                                                    class="btn btn-primary move-list-btn" type="submit">
+                                                                Move
+                                                            </button>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropend">
+                                            <button class="btn btn-light" href="#" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">Copy list
+                                            </button>
+                                            <div class="dropdown-menu" style="background: transparent;">
+                                                <div class="list-dropdown-submenu">
+                                                    <h5 class="move-list-header">Copy list</h5>
+                                                    <hr>
+                                                    <form action="{{ url_for('board', board_id=one_board.board_id) }}"
+                                                          method="post" enctype="multipart/form-data">
+                                                        <div class="mb-3">
+                                                            <label for="">Name</label>
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <input type="hidden" name="Current_List_Id"
+                                                                   value="{{ list.list_id }}">
+                                                            <input type="hidden" name="Current_List_Position"
+                                                                   value="{{ list.list_position }}">
+                                                            <input required maxlength="25" type="text"
+                                                                   class="form-control" name="List_Name_Copy"
+                                                                   value="{{ list.list_name }}">
+                                                        </div>
+                                                        <div class="mb-3">
+                                                            <button data-bs-dismiss="modal"
+                                                                    name="copy_list_form"
+                                                                    class="btn btn-primary move-list-btn"
+                                                                    type="submit">Copy list
+                                                            </button>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                    <li>
+                                        <div class="dropend">
+                                            <button class="btn btn-light" href="#" data-bs-toggle="dropdown"
+                                                    aria-expanded="false">Delete list
+                                            </button>
+                                            <div class="dropdown-menu" style="background: transparent;">
+                                                <div class="list-dropdown-submenu">
+                                                    <h5 class="move-list-header">Delete list</h5>
+                                                    <hr>
+                                                    <form action="{{ url_for('board', board_id=one_board.board_id) }}"
+                                                          method="post" enctype="multipart/form-data">
+                                                        <input type="hidden" name="Current_List_Id"
+                                                               value="{{ list.list_id }}">
+                                                        <input type="hidden" name="Current_List_Position"
+                                                               value="{{ list.list_position }}">
+                                                        <div class="mb-3">
+                                                            <label for="">
+                                                                Deleting a list is permanent. There is no undo.
+                                                            </label>
+                                                        </div>
+
+                                                        <div class="mb-3">
+                                                            <button name="delete_list_form" type="submit"
+                                                                    class="btn btn-danger move-list-btn">Delete
+                                                            </button>
+                                                        </div>
+                                                    </form>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
 
-                        <form class="list-name-edit-form hide-toggle" id="idListForm{{ list.list_id }}" method="post"
-                              action="{{ url_for('board', board_id=one_board.board_id) }}"
-                              enctype="multipart/form-data">
-
-                            <div class="mb-3">
-                                <input type="text" name="List_Name_Edit" class="form-control"
-                                       value="{{ list.list_name }}">
-                            </div>
-                            <input type="hidden" name="List_Id" value="{{ list.list_id }}">
-                            <button name="list_name_edit_form" type="submit" class="btn btn-primary">save</button>
-                            <button type="button" class="btn btn-primary" name="edit_list"
-                                    onclick="showHideListForm('#idListBtn{{ list.list_id }}',
-                                            '#idListForm{{ list.list_id }}')">cancel
-                            </button>
-                        </form>
-
-
-                        <ol id="all-cards">
-                            {% for card in all_cards %}
-                                {% if card.parent_list_id == list.list_id %}
-                                    <li>
-                                        <a href="{{ url_for('card', id_=one_board.board_id, card_id=card.card_id) }}"
-                                           role="button"
-                                           aria-controls="edit-card">
-                                            <div class="shadow-sm bg-white card">
-                                                <img class="cover-img" src="{{ card.card_cover }}" alt="">
-                                                <div class="card-body">
-                                                    <p class="card-title">{{ card.card_name }}</p>
-                                                    <div class="card-text">
-                                                        {% if card.card_dueDate %}
-                                                            <div><img src="/static/assets/svg-vector/clock.svg"
-                                                                      alt="">{{ card.card_dueDate.strftime('%b %d') }}
-                                                            </div>
-                                                        {% endif %}
-                                                        {% if card.card_description %}
-                                                            <div data-bs-container="body" data-bs-toggle="tooltip"
-                                                                 data-bs-placement="bottom"
-                                                                 title='{{ card.card_description| striptags }}'>
-                                                                <img src="/static/assets/svg-vector/description.svg"
-                                                                     alt="">
-                                                            </div>
-                                                        {% endif %}
-
-                                                        {% set count = namespace(value=0) %}
-
-                                                        {% for attachment in all_attachments %}
-                                                            {% if attachment.parent_card_id == card.card_id %}
-                                                                {% set count.value = count.value + 1 %}
-                                                            {% endif %}
-                                                        {% endfor %}
-                                                        {% if count.value > 0 %}
-                                                            <div>
-                                                                <img src="/static/assets/svg-vector/attachment.svg"
-                                                                     alt="">{{ count.value }}
-                                                            </div>
-                                                        {% endif %}
-
-                                                        {% if all_checklistItems %}
-                                                            <div>
-                                                                <img src="/static/assets/svg-vector/checkbox.svg"
-                                                                     alt="">1/3
-                                                            </div>
-                                                        {% endif %}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </a>
-                                    </li>
-                                {% endif %}
-                            {% endfor %}
-
-                            <li>
-                                <div class="add-card-form hide-toggle" id="idCardForm{{ list.list_id }}">
-                                    <form class="signup-form"
-                                          action="{{ url_for('board', board_id=one_board.board_id) }}"
-                                          method="post" enctype="multipart/form-data">
-                                        <label class="add-card-form-input">
-                                        <textarea name="Card_Name" style="resize: none;" class="form-control"
-                                                  placeholder="Enter a name for this card..." rows="2"
-                                                  required maxlength="20"></textarea>
-                                        </label>
-                                        <input type="hidden" name="List_Id" value="{{ list.list_id }}">
-                                        <button type="submit" name="add_card" class="btn btn-primary add-card-form-btn">
-                                            Add card
-                                        </button>
-                                        <a href="#" type="button" class="close-btn-form-card"
-                                           onclick="showHideListForm('#idCardBtn{{ list.list_id }}',
-                                                   '#idCardForm{{ list.list_id }}')">
-                                            <div><img src="/static/assets/svg-vector/close-button.svg" alt=""></div>
-                                        </a>
-                                    </form>
-                                </div>
-                            </li>
-                        </ol>
-
-
-                        {# Add a Card btn #}
-                        <a onclick="showHideListForm('#idCardBtn{{ list.list_id }}', '#idCardForm{{ list.list_id }}')"
-                           class="add-card-toggle" id="idCardBtn{{ list.list_id }}">
-                            <div class="add-card-btn">
-                                <img class="plus-sign-icon" src="/static/assets/svg-vector/plus-sign-black.svg" alt="">
-                                Add a card
-                                <img class="card-icon " src="/static/assets/svg-vector/card-icon.svg" alt="">
-                            </div>
-                        </a>
                     </div>
-                </li>
-            {% endif %}
-        {% endfor %}
+                </div>
 
+                <form class="list-name-edit-form hide-toggle" id="idListForm{{ list.list_id }}" method="post"
+                      action="{{ url_for('board', board_id=one_board.board_id) }}"
+                      enctype="multipart/form-data">
+
+                    <div class="mb-3">
+                        <input type="text" maxlength="25" name="List_Name_Edit" class="form-control"
+                               value="{{ list.list_name }}">
+                    </div>
+                    <input type="hidden" name="List_Id" value="{{ list.list_id }}">
+                    <button name="list_name_edit_form" type="submit" class="btn btn-primary">save</button>
+                    <button type="button" class="btn btn-primary" name="edit_list"
+                            onclick="showHideListForm('#idListBtn{{ list.list_id }}',
+                                    '#idListForm{{ list.list_id }}')">cancel
+                    </button>
+                </form>
+
+
+                <ol id="all-cards">
+                    {% for card in all_cards %}
+                        {% if card.parent_list_id == list.list_id %}
+                            <li>
+                                <a href="{{ url_for('card', id_=one_board.board_id, card_id=card.card_id) }}"
+                                   role="button"
+                                   aria-controls="edit-card">
+                                    <div class="shadow-sm bg-white card">
+                                        <img class="cover-img" src="{{ card.card_cover }}" alt="">
+                                        <div class="card-body">
+                                            <p class="card-title">{{ card.card_name }}</p>
+                                            <div class="card-text">
+                                                {% if card.card_dueDate %}
+                                                    <div>
+                                                        <img src="/static/assets/svg-vector/clock.svg" alt="">
+                                                        {{ card.card_dueDate.strftime('%b %d') }}
+                                                    </div>
+                                                {% endif %}
+                                                {% if card.card_description %}
+                                                    <div data-bs-container="body" data-bs-toggle="tooltip"
+                                                         data-bs-placement="bottom"
+                                                         title='{{ card.card_description| striptags }}'>
+                                                        <img src="/static/assets/svg-vector/description.svg" alt="">
+                                                    </div>
+                                                {% endif %}
+
+                                                {% set count = namespace(value=0) %}
+
+                                                {% for attachment in all_attachments %}
+                                                    {% if attachment.parent_card_id == card.card_id %}
+                                                        {% set count.value = count.value + 1 %}
+                                                    {% endif %}
+                                                {% endfor %}
+                                                {% if count.value > 0 %}
+                                                    <div>
+                                                        <img src="/static/assets/svg-vector/attachment.svg"
+                                                             alt="">{{ count.value }}
+                                                    </div>
+                                                {% endif %}
+
+                                                {% set complete = namespace(value=0) %}
+                                                {% set all_tasks = namespace(value=0) %}
+
+                                                {% for task in all_items %}
+                                                    {% if task.parent_card_id == card.card_id %}
+
+                                                        {% set all_tasks.value = all_tasks.value + 1 %}
+
+                                                        {% if task.item_status %}
+                                                            {% set complete.value = complete.value + 1 %}
+                                                        {% endif %}
+                                                    {% endif %}
+                                                {% endfor %}
+
+                                                {% if not all_tasks.value == 0 %}
+                                                    {% if all_tasks.value == complete.value %}
+                                                        <div style="background: lawngreen; padding: 0 3px;">
+                                                            <img src="/static/assets/svg-vector/checkbox.svg"
+                                                                 alt="">{{ complete.value }}/{{ all_tasks.value }}
+                                                        </div>
+                                                    {% else %}
+                                                        <div>
+                                                            <img src="/static/assets/svg-vector/checkbox.svg"
+                                                                 alt="">{{ complete.value }}/{{ all_tasks.value }}
+                                                        </div>
+                                                    {% endif %}
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    <li>
+                        <div class="add-card-form hide-toggle" id="idCardForm{{ list.list_id }}">
+                            <form class="signup-form"
+                                  action="{{ url_for('board', board_id=one_board.board_id) }}"
+                                  method="post" enctype="multipart/form-data">
+                                <label class="add-card-form-input">
+                                    <input name="Card_Name" style="resize: none;" class="form-control"
+                                           placeholder="Enter a name for this card..." required maxlength="20">
+                                </label>
+                                <input type="hidden" name="List_Id" value="{{ list.list_id }}">
+                                <button type="submit" name="add_card" class="btn btn-primary add-card-form-btn">
+                                    Add card
+                                </button>
+                                <a href="#" type="button" class="close-btn-form-card"
+                                   onclick="showHideListForm('#idCardBtn{{ list.list_id }}',
+                                           '#idCardForm{{ list.list_id }}')">
+                                    <div><img src="/static/assets/svg-vector/close-button.svg" alt=""></div>
+                                </a>
+                            </form>
+                        </div>
+                    </li>
+                </ol>
+
+
+                {# Add a Card btn #}
+                {% if user.id == 1 or user.id != 1 and not one_board.is_template %}
+                    <a onclick="showHideListForm('#idCardBtn{{ list.list_id }}', '#idCardForm{{ list.list_id }}')"
+                       class="add-card-toggle" id="idCardBtn{{ list.list_id }}">
+                        <div class="add-card-btn">
+                            <img class="plus-sign-icon" src="/static/assets/svg-vector/plus-sign-black.svg"
+                                 alt="">
+                            Add a card
+                            <img class="card-icon " src="/static/assets/svg-vector/card-icon.svg" alt="">
+                        </div>
+                    </a>
+                {% endif %}
+                </div>
+            </li>
+        {% endif %}
+    {% endfor %}
+
+    {% if user.id == 1 or user.id != 1 and not one_board.is_template %}
         <li>
             <a href="#" onclick="showHide('.add-btn-toggle', '.add-list-form')" class="add-btn-toggle">
                 <div class="add-btn">
-                    <img class="plus-sign-icon" src="/static/assets/svg-vector/plus-sign-black.svg" alt=""> Add a list
+                    <img class="plus-sign-icon" src="/static/assets/svg-vector/plus-sign-black.svg" alt=""> Add a
+                    list
                 </div>
             </a>
         </li>
+    {% endif %}
 
-        <li>
-            <div class="add-list-form hide-toggle">
+    <li>
+        <div class="add-list-form hide-toggle">
 
-                <form class="signup-form" action="{{ url_for('board', board_id=one_board.board_id) }}" method="post"
-                      enctype="multipart/form-data">
-                    <label>
-                        <input required maxlength="30" name="List_Name" type="text" class="form-control add-list-input"
-                               placeholder="Enter list name...">
-                    </label>
-                    <button name="add_list" type="submit"
-                            class="btn btn-primary add-list-form-btn">Add list
-                    </button>
+            <form class="signup-form" action="{{ url_for('board', board_id=one_board.board_id) }}" method="post"
+                  enctype="multipart/form-data">
+                <label>
+                    <input required maxlength="25" name="List_Name" type="text" class="form-control add-list-input"
+                           placeholder="Enter list name...">
+                </label>
+                <button name="add_list" type="submit"
+                        class="btn btn-primary add-list-form-btn">Add list
+                </button>
 
-                    <a href="#" type="button" onclick="showHide('.add-btn-toggle', '.add-list-form')"
-                       class="close-btn-form-card">
-                        <div>
-                            <img src="/static/assets/svg-vector/close-button.svg" alt="">
-                        </div>
-                    </a>
-                </form>
-            </div>
-        </li>
+                <a href="#" type="button" onclick="showHide('.add-btn-toggle', '.add-list-form')"
+                   class="close-btn-form-card">
+                    <div>
+                        <img src="/static/assets/svg-vector/close-button.svg" alt="">
+                    </div>
+                </a>
+            </form>
+        </div>
+    </li>
     </ol>
 </section>
 
@@ -414,34 +540,28 @@
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill"
-                        data-bs-target="#pills-profile"
+                <button class="nav-link" id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile"
                         type="button" role="tab" aria-controls="pills-profile" aria-selected="false">Photos
                 </button>
             </li>
         </ul>
-        <form action="{{ url_for('board', board_id=one_board.board_id) }}" method="post"
-              enctype="multipart/form-data">
+        <form action="{{ url_for('board', board_id=one_board.board_id) }}" method="post" enctype="multipart/form-data">
 
             <div class="tab-content" id="pills-tabContent">
 
-                <div class="tab-pane fade show active" id="pills-home" role="tabpanel"
-                     aria-labelledby="pills-home-tab">
+                <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab">
 
                     <div class="flex-color-parent">
                         {% for bg_color in all_colors %}
-                            <input type="radio" class="board-bg-color-modal"
-                                   name="boardBgOption"
-                                   id="colorRadioModal{{ all_colors.index(bg_color) }}"
+                            <input type="radio" class="board-bg-color-modal" required
+                                   name="boardBgOption" id="colorRadioModal{{ all_colors.index(bg_color) }}"
                                    value="/static/assets/images/board_background_img/bg_colors/{{ bg_color }}">
-                            <label class="display-selector"
-                                   for="colorRadioModal{{ all_colors.index(bg_color) }}"
+                            <label class="display-selector" for="colorRadioModal{{ all_colors.index(bg_color) }}"
                                    style="background-image: url('/static/assets/images/board_background_img/bg_colors/{{ bg_color }}');"></label>
 
                         {% endfor %}
 
                     </div>
-
 
                 </div>
 
@@ -450,7 +570,7 @@
 
                     <div class="flex-img-parent">
                         {% for bg_img in all_images %}
-                            <input type="radio" class="board-bg-img-modal" name="boardBgOption"
+                            <input type="radio" class="board-bg-img-modal" name="boardBgOption" required
                                    id="imgRadioModal{{ all_images.index(bg_img) }}"
                                    value="{{ bg_img }}">
                             <label class="display-selector" for="imgRadioModal{{ all_images.index(bg_img) }}"

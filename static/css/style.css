@@ -1,5 +1,8 @@
 body {
     font-family: "Myriad Pro", sans-serif;
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
 }
 
 /******************************** index page *************************************/
@@ -24,6 +27,9 @@ a {
     text-decoration: none;
 }
 
+#navbar {
+    background-color: #fffff8;
+}
 
 #navbar .log_in_btn {
     color: #3573d8;
@@ -83,27 +89,6 @@ a {
     min-width: 8.9375rem;
 }
 
-@media screen and (max-width: 430px) {
-    .text-heading {
-        text-align: center;
-        font-size: 2.625rem;
-        width: 100%;
-    }
-
-    .sub-heading {
-        text-align: center;
-    }
-
-    .email-form {
-        text-align: center;
-    }
-
-    #index-mainPage .vector-img {
-        display: none;
-        width: 18.75rem;
-    }
-}
-
 
 /*************************************** Sign up Page ***************************************/
 
@@ -111,7 +96,7 @@ a {
 
 .shadow-card-signup {
     width: 25rem;
-    height: 40.625rem;
+    height: 42.625rem;
     margin: 3.125rem auto 0.625rem;
     padding: 2.25rem;
 }
@@ -122,7 +107,6 @@ a {
 
 .signup-heading {
     padding-top: 1.625rem;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 1.125rem;
     color: #0a1551;
 }
@@ -132,7 +116,6 @@ a {
 }
 
 .main-container-signup p {
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.8125rem;
     color: #6c757e;
 }
@@ -171,12 +154,6 @@ a {
     left: 2.75rem;
 }
 
-@media screen and (max-width: 1050px) {
-    .vector-bg1, .vector-bg2 {
-        display: none;
-    }
-
-}
 
 /*************************************** Login Page ***************************************/
 
@@ -200,7 +177,6 @@ a {
 
 .login-heading {
     padding: 1.625rem 0 1.625rem;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 1.125rem;
     color: #0a1551;
 }
@@ -242,12 +218,10 @@ a {
 }
 
 .name-logout {
-    font-family: "Myriad Pro", sans-serif;
     font-size: 1.25rem;
 }
 
 .email-logout {
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.875rem;
     /*font-weight: normal;*/
     color: #6c757e;
@@ -280,7 +254,6 @@ a {
 
 .dropdown-btn {
     color: #44536d;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.9375rem;
     margin-right: 0.375rem;
     border: none;
@@ -313,14 +286,12 @@ a {
 
 .workspace-dropdown p {
     text-align: left;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.8125rem;
     color: #68737e;
 }
 
 #workspace-dropdown-menu p {
     text-align: left;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.8125rem;
     color: #68737e;
 }
@@ -333,7 +304,6 @@ a {
 .workspace-dropdown a {
     text-align: left;
     color: #68737e;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.9375rem;
     display: flex;
     align-content: center;
@@ -356,60 +326,96 @@ a {
 #recent-dropdown-menu {
     width: 18.9375rem;
     border: none;
-    padding: 0.9375rem 1.25rem;
+    padding: 15px 10px;
     background-color: #fcfcfc;
     overflow: auto;
     z-index: 1;
 }
 
-
-.recent-dropdown img {
-    height: 2rem;
-}
-
-.recent-dropdown a {
-    text-align: left;
-    color: #68737e;
-    font-family: "Myriad Pro", sans-serif;
-    font-size: 0.9375rem;
-}
-
-.recent-dropdown .project_name_dropdown {
-    font-size: 0.875rem;
-    font-weight: bold;
-    margin: 0;
-}
-
-.recent-dropdown .workspace_name_dropdown {
-    font-size: 0.75rem;
-    margin: 0;
-}
-
-.recent-dropdown .project-img-column {
-    width: 24%;
+.recent-dropdown {
     display: flex;
-    justify-items: center;
+    justify-content: flex-start;
     align-items: center;
-    padding: 0 0.5625rem 0 0.75rem;
+    /*height: 5rem;*/
+    /*margin: 0.5rem auto;*/
 }
 
-.recent-dropdown .project-details-column {
-    width: 70%;
-    padding: 0;
+.recent-dropdown .board-img {
+    width: 2.5rem;
+    height: 2rem;
+    margin-right: 10px;
 }
 
-.recent-dropdown .btn-dropdown {
+.board-img img {
     width: 100%;
-    margin: 0.125rem 0;
-    padding: 0.1875rem 0;
-    font-size: 0.9375rem;
-    border: none;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 3px;
 }
 
-.recent-dropdown .btn-dropdown:hover {
-    color: #7152d9;
-    background-color: #e6e6ff;
+.board-details p {
+    margin: 0;
+    text-align: left;
+    color: #1f2733;
 }
+
+.project_name_dropdown {
+    font-size: 15px;
+    font-weight: bold;
+}
+
+.workspace_name_dropdown {
+    font-size: 13px;
+}
+
+.board-tile-dropdown {
+    margin: 0.2rem auto;
+    width: 100%;
+    padding: 2px 0 2px 5px;
+}
+
+/*.recent-dropdown a {*/
+/*    text-align: left;*/
+/*    color: #68737e;*/
+/*    font-size: 0.9375rem;*/
+/*}*/
+
+/*.recent-dropdown .project_name_dropdown {*/
+/*    font-size: 0.875rem;*/
+/*    font-weight: bold;*/
+/*    margin: 0;*/
+/*}*/
+
+/*.recent-dropdown .workspace_name_dropdown {*/
+/*    font-size: 0.75rem;*/
+/*    margin: 0;*/
+/*}*/
+
+/*.recent-dropdown .project-img-column {*/
+/*    width: 24%;*/
+/*    display: flex;*/
+/*    justify-items: center;*/
+/*    align-items: center;*/
+/*    padding: 0 0.5625rem 0 0.75rem;*/
+/*}*/
+
+/*.recent-dropdown .project-details-column {*/
+/*    width: 70%;*/
+/*    padding: 0;*/
+/*}*/
+
+/*.recent-dropdown .btn-dropdown {*/
+/*    width: 100%;*/
+/*    margin: 0.125rem 0;*/
+/*    padding: 0.1875rem 0;*/
+/*    font-size: 0.9375rem;*/
+/*    border: none;*/
+/*}*/
+
+/*.recent-dropdown .btn-dropdown:hover {*/
+/*    color: #7152d9;*/
+/*    background-color: #e6e6ff;*/
+/*}*/
 
 .new-board-btn {
     padding: 0.5rem 0.625rem;
@@ -419,7 +425,9 @@ a {
 }
 
 #create-board-dropdown-menu {
-    width: 19.125rem;
+    height: 85dvh;
+    overflow-y: auto;
+    width: 20.125rem;
     padding: 0.9375rem 0.75rem;
 }
 
@@ -522,7 +530,7 @@ input.board-bg-color-modal[type=radio] + label {
 
 #create-board-modal .modal-dialog {
     top: 1.25rem;
-    right: 2.8125rem;
+    /*right: 2.8125rem;*/
     width: 19.125rem;
 }
 
@@ -789,11 +797,13 @@ input.board-bg-color-modal[type=radio] + label {
 }
 
 .create-workspace {
-    min-width: 75rem;
+    width: 90%;
+    /*min-width: 75rem;*/
     min-height: 38.75rem;
     background-color: #fcfcfc;
     margin: auto;
 }
+
 
 .create-workspace .offcanvas-body {
     text-align: left;
@@ -807,6 +817,7 @@ input.board-bg-color-modal[type=radio] + label {
     list-style: none;
     padding: 3.125rem 7.1875rem;
 }
+
 
 .create-workspace-heading {
     font-size: 1.5625rem;
@@ -835,26 +846,6 @@ input.board-bg-color-modal[type=radio] + label {
     margin-top: 0;
 }
 
-@media screen and (max-width: 991px) {
-    .new-board-btn {
-        display: none;
-    }
-}
-
-@media screen and (max-width: 626px) {
-    #sidenav {
-        display: none;
-    }
-
-    .parent-div {
-        padding-top: 2rem;
-    }
-
-    /*.back-icon img {*/
-    /*    padding: 0 1rem;*/
-    /*    display: none;*/
-    /*}*/
-}
 
 /*850 951*/
 /***************** Side Navigation Bar*****************/
@@ -862,17 +853,60 @@ input.board-bg-color-modal[type=radio] + label {
 .parent-div {
     display: flex;
     align-items: flex-start;
-    margin-top: 50px;
+    margin-top: 5rem;
     gap: 1rem;
 }
+.side-nav-btn {
+    margin: 0.5rem;
+    display: none;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background-color: #e9f3ff;
+    position: absolute;
+}
 
-#sidenav {
-    min-width: 300px;
+.side-arrow-icon {
+    height: 20px;
+    margin: auto;
+}
+
+.side {
+    z-index: 1000;
+    position: fixed;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+    background-color: white;
+    top: 10px;
+    margin-top: 5rem;
+    visibility: hidden;
+    background-clip: padding-box;
+    outline: 0;
+    transition: transform 3s ease-in-out;
+}
+
+#sidenav, #sidenav_offcanvas {
+    min-width: 18.75rem;
     background-color: #fcfcfc;
     position: sticky;
-    top: 80px;
+    top: 5rem;
     height: 100dvh;
+    padding: 10px 5px;
 }
+
+#sidenav_offcanvas {
+    /*min-width: 18.75rem;*/
+    background-color: #fcfcfc;
+    position: sticky;
+    top: 5rem;
+    height: max-content;
+    padding: 20px 5px;
+    overflow-y: auto;
+}
+
+
 
 /*#sidenav {*/
 /*    min-height: 31.25rem;*/
@@ -886,23 +920,22 @@ input.board-bg-color-modal[type=radio] + label {
 /*    padding-top: 1.25rem;*/
 /*}*/
 
-#sidenav a {
+#sidenav a, #sidenav_offcanvas a {
     text-align: left;
     width: 98%;
     display: block;
     margin: 0.1875rem auto;
     border: none;
     padding: 0.625rem 3.125rem 0.625rem 1.25rem;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.9375rem;
 }
 
-#sidenav a img {
+#sidenav a img, #sidenav_offcanvas a img {
     height: 0.9375rem;
     padding-right: 0.875rem;
 }
 
-#sidenav a:hover {
+#sidenav a:hover, #sidenav_offcanvas a:hover {
     color: #5b5b5b;
     background-color: #ededed;
 }
@@ -912,12 +945,12 @@ input.board-bg-color-modal[type=radio] + label {
 /*    background-color: #e9f3ff;*/
 /*}*/
 
-#sidenav .btn.active {
+#sidenav .btn.active, #sidenav_offcanvas .btn.active {
     color: #0266e2;
     background-color: #e9f3ff;
 }
 
-#sidenav a:focus {
+#sidenav a:focus, #sidenav_offcanvas a:focus {
     color: #0266e2;
     background-color: #e9f3ff;
 }
@@ -958,7 +991,6 @@ input.board-bg-color-modal[type=radio] + label {
     width: 80%;
     margin: 0.1875rem auto;
     padding: 0.375rem 0.625rem 0.375rem 0.625rem;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.9375rem;
 }
 
@@ -978,6 +1010,8 @@ input.board-bg-color-modal[type=radio] + label {
 
 #main-content {
     overflow-x: hidden;
+    width: 100%;
+    height: 100dvh;
 }
 
 
@@ -996,14 +1030,14 @@ input.board-bg-color-modal[type=radio] + label {
     padding: 1.25rem 0;
 }
 
-.template .template-icon-img {
-    height: 2.5rem;
-    padding: 0.625rem 1.25rem 0.625rem 0;
+.template-icon-img {
+    height: 1.3rem;
+    margin: 0.625rem 1rem 0.625rem 0;
+    /*padding: 0.625rem 1.25rem 0.625rem 0;*/
 }
 
 .template h3 {
     text-align: left;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 1.25rem;
 }
 
@@ -1022,13 +1056,12 @@ input.board-bg-color-modal[type=radio] + label {
 
 .your-boards-parent {
     display: flex;
-    /*gap: 0.9375rem;*/
-    gap: 10px;
+    gap: 0.625rem;
     flex-wrap: wrap;
 }
 
 .board-tile {
-    width: 191px;
+    width: 11.9375rem;
     height: 6rem;
     /*background-color: crimson;*/
     border-radius: 0.3125rem;
@@ -1037,7 +1070,7 @@ input.board-bg-color-modal[type=radio] + label {
 
 .delete-board-icon {
     padding: 0;
-    height: 15px;
+    height: 0.9375rem;
     position: absolute;
     top: 0.625rem;
     right: 0.625rem;
@@ -1050,7 +1083,7 @@ input.board-bg-color-modal[type=radio] + label {
 
 
 .board-tile .board-tile-bg {
-    width: 191px;
+    width: 11.9375rem;
     height: 6rem;
     border-radius: 0.3125rem;
     object-fit: cover;
@@ -1061,7 +1094,6 @@ input.board-bg-color-modal[type=radio] + label {
 }
 
 .board-tile .board-name-text {
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.9375rem;
     color: white;
     padding: 0 0.375rem;
@@ -1073,11 +1105,6 @@ input.board-bg-color-modal[type=radio] + label {
     border-radius: 0.3125rem;
 }
 
-@media screen and (max-width: 423px) {
-    .board-tile, .board-tile .board-tile-bg {
-        width: 166px;
-    }
-}
 
 .template-text {
     border-radius: 0.3125rem;
@@ -1102,7 +1129,6 @@ input.board-bg-color-modal[type=radio] + label {
 
 .recently-viewed h3 {
     text-align: left;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 1.25rem;
 }
 
@@ -1117,7 +1143,6 @@ input.board-bg-color-modal[type=radio] + label {
 
 .workspaces h3 {
     text-align: left;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 1.125rem;
     padding: 1.875rem 0 1.25rem 0;
     /*font-weight: normal;*/
@@ -1146,7 +1171,6 @@ input.board-bg-color-modal[type=radio] + label {
 .workspaces h4 {
     /*margin: 1.875rem 0;*/
     text-align: left;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 1.125rem;
 }
 
@@ -1166,21 +1190,19 @@ input.board-bg-color-modal[type=radio] + label {
 }
 
 .board-tile-empty p {
-    font-family: "Myriad Pro", sans-serif;
     font-size: 0.9375rem;
     color: #68707d;
     margin: 0;
 }
 
 
-.one-workspace {
-    margin: 6.25rem 3.125rem;
-}
+/*.one-workspace {*/
+/*    margin: 6.25rem 3.125rem;*/
+/*}*/
 
 
 .one-workspace h3 {
     text-align: left;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 1.125rem;
     padding: 1.875rem 0 1.25rem 0;
     /*font-weight: normal;*/
@@ -1195,7 +1217,6 @@ input.board-bg-color-modal[type=radio] + label {
 .one-workspace h4 {
     margin: 1.875rem 0;
     text-align: left;
-    font-family: "Myriad Pro", sans-serif;
     font-size: 1.125rem;
     display: flex;
     align-items: center;
@@ -1226,8 +1247,12 @@ input.board-bg-color-modal[type=radio] + label {
     margin: 0 0.625rem;
 }
 
-.template-tab {
-    padding: 2.1875rem 2.375rem;
+/*.template-tab {*/
+/*    padding: 2.1875rem 2.375rem;*/
+/*}*/
+
+.workspace-name-setting {
+    margin: 1.875rem 0;
 }
 
 .workspace-setting {
@@ -1253,18 +1278,9 @@ input.board-bg-color-modal[type=radio] + label {
     margin: 0 0.3125rem;
 }
 
-
-.edit-workspace .modal-dialog {
-    top: 13.125rem;
-    width: 28.125rem;
-}
-
-.edit-workspace .modal-header {
-    margin-left: 7.5rem;
-}
-
-.edit-workspace .modal-body {
-    padding: 0.9375rem 0.75rem;
+.del-brd-drp {
+    max-width: 25rem;
+    padding: 1rem;
 }
 
 /*************************************** single Board ***************************************/
@@ -1340,7 +1356,6 @@ input.board-bg-color-modal[type=radio] + label {
     font-weight: bold;
     color: black;
     width: max-content;
-    cursor: pointer;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
@@ -1393,6 +1408,24 @@ input.board-bg-color-modal[type=radio] + label {
 .change-bg-icon {
     height: 1rem;
     margin-right: 0.625rem;
+}
+
+.template-board-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #494949;
+    border: 1px solid #7c90a1;
+}
+
+.template-board-btn span {
+    color: white;
+}
+
+.template-board-btn button {
+    padding: 4px 10px;
+    border: none;
+    border-radius: 0;
 }
 
 /****** Main content *******/
@@ -1479,17 +1512,6 @@ input.board-bg-color-modal[type=radio] + label {
     /*scroll-snap-align: start;*/
 }
 
-/*@media screen and (max-width: 720px) {*/
-/*    #board-row {*/
-/*        overflow-x: scroll;*/
-/*        scroll-snap-type: x mandatory;*/
-/*    }*/
-
-/*    .list-container {*/
-/*        scroll-snap-align: center;*/
-/*    }*/
-/*}*/
-
 .list-heading {
     display: flex;
     justify-content: space-around;
@@ -1566,14 +1588,14 @@ input.board-bg-color-modal[type=radio] + label {
 
 /* list of all cards */
 
-ol {
+#board-main-page ol {
     list-style: none;
     margin: 0.3125rem 0;
     padding: 0;
     overflow-y: auto;
 }
 
-ol li {
+#board-main-page ol li {
     margin: 0.3125rem 0;
 }
 
@@ -1725,7 +1747,7 @@ ol li {
 
 .change-bg-panel {
     max-width: 22.25rem;
-    margin-top: 50px;
+    margin-top: 3.125rem;
 }
 
 #change-bg .cng-bg-title {
@@ -1927,17 +1949,8 @@ ol li {
     position: relative;
 }
 
-@media screen and (max-width: 1154px) {
-    .edit-card-form .modal-body1 {
-        flex-wrap: wrap;
-    }
-
-    .edit-card-form .modal-content1 {
-        width: 90%;
-    }
-}
-
 .edit-card-form-main {
+    width: 100%;
     min-width: 16.4375rem;
     background-color: #f0f2f4;
     max-width: 32.5rem;
@@ -1945,28 +1958,28 @@ ol li {
 
 .close-edit-card-btn {
     position: absolute;
-    right: 20px;
+    right: 1.25rem;
     /*margin-left: 10rem;*/
 }
 
-.edit-card-form-main ul {
-    list-style: none;
-    padding: 0;
-}
+/*.edit-card-form-main ul {*/
+/*    list-style: none;*/
+/*    padding: 0;*/
+/*}*/
 
-.edit-card-form-main li {
-    margin: 0 0.8125rem 2.0625rem 0.8125rem;
-}
+/*.edit-card-form-main li {*/
+/*    margin: 0 0.8125rem 2.0625rem 0.8125rem;*/
+/*}*/
 
 .edit-card-form-main img {
     width: 1.125rem;
     margin-right: 0.9375rem;
 }
 
-.edit-card-form-main ul div {
-    font-size: 1rem;
-    font-weight: bold;
-}
+/*.edit-card-form-main ul div {*/
+/*    font-size: 1rem;*/
+/*    font-weight: bold;*/
+/*}*/
 
 .card-name-parent {
     display: flex;
@@ -1979,9 +1992,6 @@ ol li {
     align-items: center;
 }
 
-.card-name {
-    cursor: pointer;
-}
 
 .card-name p {
     font-size: 0.875rem;
@@ -2011,7 +2021,7 @@ ol li {
 .card-action-dropdown-btn button {
     width: 100%;
     margin: 0.3125rem auto;
-    padding: 4px 0;
+    padding: 0.25rem 0;
 }
 
 .card-description-parent {
@@ -2023,10 +2033,10 @@ ol li {
 
 .desc-div {
     width: 100%;
-    padding: 5px 5px 25px 5px;
-    font-size: 12px;
+    padding: 0.3125rem 0.3125rem 1.5625rem 0.3125rem;
+    font-size: 0.75rem;
     font-weight: 400;
-    border-radius: 3px;
+    border-radius: 0.1875rem;
     background-color: #e3e5e9;
     margin: 1rem 1rem 1rem 2rem;
 }
@@ -2040,9 +2050,15 @@ ol li {
 }
 
 .card-description-parent #card-desc-text {
-    margin: 0.5rem 0.5rem 0 2rem;
+    margin: 0.5rem 0.5rem 0.5rem 2rem;
     width: 100%;
+    font-size: 13px;
 }
+
+.card-description-parent #card-desc-text p {
+    margin: 0;
+}
+
 
 .card-description-parent .edit-desc-btn {
     /*height: 1.8rem;*/
@@ -2125,7 +2141,7 @@ ol li {
 
 .attachment-details {
     width: 65%;
-    padding: 2px;
+    padding: 0.125rem;
 }
 
 .attachment-name {
@@ -2197,6 +2213,7 @@ ol li {
 .checklist-name-display {
     /*width: 94%;*/
 }
+
 .delete-checklist-btn {
     padding: 0.1875rem 1rem;
 }
@@ -2439,8 +2456,104 @@ ol li {
     font-size: 0.8125rem;
 }
 
-/*@media screen and (max-width: 768px) {*/
-/*    .edit-card-form .modal-content1 {*/
-/*        width: 90%;*/
-/*    }*/
-/*}*/
+
+/* media queries */
+
+@media screen and (max-width: 26.4375rem) {
+    .board-tile, .board-tile-empty, .board-tile .board-tile-bg {
+        width: 10.375rem;
+    }
+
+    .edit-workspace-form {
+        width: 100%;
+    }
+}
+
+@media screen and (max-width: 26.875rem) {
+    .text-heading {
+        text-align: center;
+        font-size: 2.625rem;
+        width: 100%;
+    }
+
+    .sub-heading {
+        text-align: center;
+    }
+
+    .email-form {
+        text-align: center;
+    }
+
+    #index-mainPage .vector-img {
+        display: none;
+        width: 18.75rem;
+    }
+}
+
+@media screen and (max-width: 39.125rem) {
+    #sidenav {
+        display: none;
+    }
+
+    .side-nav-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .parent-div {
+        padding-top: 2rem;
+    }
+
+    .template-board-btn span {
+        display: none;
+    }
+
+}
+
+@media screen and (max-width: 44.3125rem) {
+    .create-workspace-content {
+        width: 90%;
+        padding: 0;
+        margin: 5rem auto 2rem;
+    }
+
+    .create-workspace-heading, .create-workspace-subheading {
+        text-align: center;
+    }
+}
+
+@media screen and (max-width: 61.9375rem) {
+    .new-board-btn {
+        display: none;
+    }
+}
+
+@media screen and (max-width: 65.625rem) {
+    .vector-bg1, .vector-bg2 {
+        display: none;
+    }
+
+}
+
+
+@media screen and (max-width: 72.125rem) {
+    .edit-card-form .modal-body1 {
+        flex-wrap: wrap;
+    }
+
+    .edit-card-form .modal-content1 {
+        width: 90%;
+    }
+}
+
+@media screen and (max-width: 75.625rem) {
+    .create-workspace-bg {
+        display: none;
+    }
+
+    .create-workspace-content {
+        margin: 0.3125rem auto 0.125rem;
+        padding: 0;
+    }
+}

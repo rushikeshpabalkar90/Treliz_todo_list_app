@@ -26,12 +26,12 @@
             {% endwith %}
 
             <div class="mb-3">
-                <input required type="email" name="Email" class="form-control" placeholder="Enter email">
+                <input required maxlength="100" type="email" name="Email" class="form-control" placeholder="Enter email">
             </div>
 
             <div class="mb-1">
-                <input required type="password" name="Password" class="form-control" id="exampleInputPassword"
-                       placeholder="Enter password">
+                <input required minlength="8" maxlength="50" type="password" name="Password" class="form-control"
+                       id="exampleInputPassword" placeholder="Enter password">
             </div>
 
             <div style="text-align: left; font-size: 13px" class="mb-3">

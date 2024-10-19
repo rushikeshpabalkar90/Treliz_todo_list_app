@@ -2,6 +2,10 @@
 
 <body>
 <nav class="navbar navbar-expand-lg navbar-light fixed-top bg-light">
+    <div class="shadow side-nav-btn" role="button" onclick="aF()">
+        <img class="side-arrow-icon" src="/static/assets/svg-vector/side-arrow.svg" alt="">
+    </div>
+
     <div class="container-fluid">
         <a class="navbar-brand ms-lg-5 ms-md-3 ms-sm-1" href="#"><img src="/static/assets/images/logo.png" alt=""></a>
         <button type="button" class="navbar-toggler btn btn-outline-secondary dropdown-btn workspaces-btn"
@@ -68,36 +72,34 @@
                 </li>
                 <li class="nav-item dropdown">
                     <button type="button" class="btn btn-outline-secondary dropdown-btn"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                        Recent
+                            data-bs-toggle="dropdown" aria-expanded="false">Recent
                         <img class="dropdown-down-icon" src="/static/assets/svg-vector/dropdown_down.svg"
                              alt="workspace tab">
                     </button>
 
                     <ul id="recent-dropdown-menu" aria-labelledby="dropdownMenuClickable"
                         class="shadow mb-2 bg-white rounded dropdown-menu">
-                        {% for board in all_boards_recent %}
+                        {% for board in all_boards_recent[:8] %}
                             {% if not board.is_template %}
                                 <li>
-                                    <div class="recent-dropdown">
-                                        <a href="{{ url_for('board', board_id=board.board_id) }}"
-                                           class="btn btn-outline-secondary btn-dropdown">
-                                            <div class="row">
-                                                <div class="project-img-column">
-                                                    <img class="workspace-logo" src="{{ board.board_background_image }}"
-                                                         alt="workspace-icon">
-                                                </div>
-                                                <div class="project-details-column">
-                                                    <p class="project_name_dropdown">{{ board.board_name }}</p>
-                                                    {% for workspace in all_workspaces %}
-                                                        {% if board.parent_workspace_id == workspace.workspace_id %}
-                                                            <p class="workspace_name_dropdown">{{ workspace.workspace_name }}</p>
-                                                        {% endif %}
-                                                    {% endfor %}
-                                                </div>
+                                    <a href="{{ url_for('board', board_id=board.board_id) }}"
+                                       class="btn btn-light board-tile-dropdown">
+                                        <div class="recent-dropdown">
+
+                                            <div class="board-img">
+                                                <img src="{{ board.board_background_image }}" alt="">
                                             </div>
-                                        </a>
-                                    </div>
+                                            <div class="board-details">
+                                                <p class="project_name_dropdown">{{ board.board_name }}</p>
+                                                {% for workspace in all_workspaces %}
+                                                    {% if board.parent_workspace_id == workspace.workspace_id %}
+                                                        <p class="workspace_name_dropdown">{{ workspace.workspace_name }}</p>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </a>
+
                                 </li>
                             {% endif %}
                         {% endfor %}
@@ -118,21 +120,19 @@
 
                         {% for template in all_templates %}
                             <li>
-                                <div class="recent-dropdown">
-                                    <a href="{{ url_for('board', board_id=template.board_id) }}"
-                                       class="btn btn-outline-secondary btn-dropdown">
-                                        <div class="row">
-                                            <div class="project-img-column">
-                                                <img class="workspace-logo" src="{{ template.board_background_image }}"
-                                                     alt="workspace-icon">
-                                            </div>
-                                            <div class="project-details-column">
-                                                <p class="project_name_dropdown">{{ template.board_name }}</p>
-                                                <p class="workspace_name_dropdown">Template</p>
-                                            </div>
+                                <a href="{{ url_for('board', board_id=template.board_id) }}"
+                                   class="btn btn-light board-tile-dropdown">
+                                    <div class="recent-dropdown">
+
+                                        <div class="board-img">
+                                            <img src="{{ template.board_background_image }}" alt="">
                                         </div>
-                                    </a>
-                                </div>
+                                        <div class="board-details">
+                                            <p class="project_name_dropdown">{{ template.board_name }}</p>
+                                            <p class="workspace_name_dropdown">Template</p>
+                                        </div>
+                                    </div>
+                                </a>
                             </li>
                         {% endfor %}
                     </ul>
@@ -246,7 +246,7 @@
                        style="background-image: url('/static/assets/svg-vector/search-icon.png'); width: 14.375rem; padding-left: 1.875rem; margin: 0 0.9375rem; background-repeat: no-repeat; background-position: left center;">
             </div>
             <div class="nav-item dropstart dropdown">
-                <a href="#" class="btn-dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <a href="#" class="btn-dropdown disabled" role="button" data-bs-toggle="dropdown" aria-expanded="false">
 
                     <img class="notification-icon" src="/static/assets/svg-vector/notification_bell.svg"
                          alt="notification">
@@ -305,7 +305,7 @@
             </div>
             <div class="nav-item">
                 <a style="background: {{ user.user_logo_color }}" class="user-avatar" data-bs-toggle="offcanvas"
-                   href="#offcanvasExample" role="button" aria-controls="offcanvasExample">
+                   href="#accountOffcanvas" role="button" aria-controls="offcanvasExample">
                     {{ user.user_name[0].title() }}
                 </a>
             </div>
@@ -314,7 +314,7 @@
     </div>
 </nav>
 
-<div class="offcanvas offcanvas-end account-panel" tabindex="-1" id="offcanvasExample"
+<div class="offcanvas offcanvas-end account-panel" tabindex="-1" id="accountOffcanvas"
      aria-labelledby="offcanvasExampleLabel">
     <div class="offcanvas-header">
         <h5 class="offcanvas-title" id="offcanvasExampleLabel">ACCOUNT</h5>
@@ -356,14 +356,16 @@
             <li>
                 <hr>
             </li>
-            <li>
-                <a data-bs-toggle="offcanvas" href="#create_workspace" role="button"
-                   aria-controls="create_workspace" class="account-panel-element">
-                    <img class="workspace-logo" src="/static/assets/svg-vector/workspace.svg"
-                         alt="workspace-icon">
-                    Create Workspace
-                </a>
-            </li>
+            {% if all_workspaces|length <= 5 %}
+                <li>
+                    <a data-bs-toggle="offcanvas" href="#create_workspace" role="button"
+                       aria-controls="create_workspace" class="account-panel-element">
+                        <img class="workspace-logo" src="/static/assets/svg-vector/workspace.svg"
+                             alt="workspace-icon">
+                        Create Workspace
+                    </a>
+                </li>
+            {% endif %}
             <li>
                 <hr>
             </li>
@@ -424,6 +426,93 @@
 
 </div>
 
+
+<div class="side account-panel" id="sidePanelOffcanvas">
+
+    <div id="sidenav_offcanvas">
+        <div class="nav flex-column nav-pills" style="margin: 0 10px;" id="v-pills-tab" role="tablist"
+             aria-orientation="vertical">
+
+            <a class="btn btn-outline-secondary nav-btn active" id="allBoards-tab" type="button">
+                <img src="/static/assets/svg-vector/board_kanban.svg" alt="board-kanban-icon">Boards
+            </a>
+
+            <a class="btn btn-outline-secondary nav-btn" id="template-tab" type="button">
+                <img src="/static/assets/svg-vector/template_kanban.svg" alt="template-kanban-icon">Template
+            </a>
+        </div>
+
+        <hr>
+
+        <div id="workspace-sidebar">
+            <h6>Workspaces</h6>
+
+            {% if (user.id == 1 and all_workspaces[1:] == []) or all_workspaces == [] %}
+                <a data-bs-toggle="offcanvas" href="#create_workspace" role="button"
+                   aria-controls="create_workspace"
+                   class="account-panel-element">
+                    <img class="workspace-logo" src="/static/assets/svg-vector/workspace.svg" alt="workspace-icon">
+                    Create Workspace
+                </a>
+            {% endif %}
+            <div class="accordion accordion-flush" id="accordionFlushExample">
+                {% for workspace in all_workspaces %}
+                    {% if workspace.workspace_id != 1 %}
+                        <div class="accordion-item">
+                            <h2 class="accordion-header" id="head{{ all_workspaces.index(workspace) }}">
+                                <button style="padding: 8px;" class="accordion-button collapsed" type="button"
+                                        data-bs-toggle="collapse" aria-expanded="false"
+                                        data-bs-target="#workspace{{ all_workspaces.index(workspace) }}"
+                                        aria-controls="workspace{{ all_workspaces.index(workspace) }}">
+                                    {#                            <img class="workspace-logo" src="/static/assets/svg-vector/workspace.svg"#}
+                                    {#                                 alt="workspace-icon">#}
+                                    <div style="background: {{ workspace.workspace_logo_color }}"
+                                         class="workspace-logo-accordion">{{ workspace.workspace_name[0].title() }}</div>
+                                    {{ workspace.workspace_name }}
+                                </button>
+                            </h2>
+                            <div id="workspace{{ all_workspaces.index(workspace) }}"
+                                 class="accordion-collapse collapse"
+                                 aria-labelledby="head{{ all_workspaces.index(workspace) }}"
+                                 data-bs-parent="#accordionFlushExample">
+
+                                <div class="accordion-body">
+                                    <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist">
+                                        <a class="btn btn-outline-secondary nav-btn" type="button"
+                                           id="workspaceBoard-tab{{ workspace.workspace_id }}">
+                                            <img src="/static/assets/svg-vector/board_kanban.svg"
+                                                 alt="board-kanban-icon">
+                                            Boards
+                                        </a>
+                                        <a class="btn btn-outline-secondary nav-btn" type="button"
+                                           id="favBoard-tab{{ workspace.workspace_id }}">
+                                            <img src="/static/assets/svg-vector/favorite.svg" alt="favorite-icon">
+                                            Favorite
+                                        </a>
+                                        <a class="btn btn-outline-secondary nav-btn disabled" type="button"
+                                           id="workspaceMember-tab{{ workspace.workspace_id }}">
+                                            <img src="/static/assets/svg-vector/many_user.svg" alt="members-icon">
+                                            Members
+                                        </a>
+                                        <a class="btn btn-outline-secondary nav-btn" type="button"
+                                           id="workspaceSetting-tab{{ workspace.workspace_id }}">
+                                            <img src="/static/assets/svg-vector/setting.svg" alt="setting-icon">
+                                            Settings
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
 {% if (user.id == 1 and all_workspaces[1:] == []) or all_workspaces == [] %}
 
     <div class="offcanvas offcanvas-top create-workspace show" tabindex="-1" id="create_workspace"
@@ -479,13 +568,11 @@
         <div class="nav flex-column nav-pills" style="margin: 0 10px;" id="v-pills-tab" role="tablist"
              aria-orientation="vertical">
 
-            <a class="btn btn-outline-secondary active" id="v-pills-allBoards-tab" data-bs-target="#v-pills-allBoards"
-               type="button" role="tab" aria-controls="v-pills-allBoards" aria-selected="true" data-bs-toggle="pill">
+            <a class="btn btn-outline-secondary nav-btn active" id="allBoards-tab" type="button">
                 <img src="/static/assets/svg-vector/board_kanban.svg" alt="board-kanban-icon">Boards
             </a>
 
-            <a class="btn btn-outline-secondary" id="v-pills-template-tab" data-bs-toggle="pill" aria-selected="false"
-               data-bs-target="#v-pills-template" type="button" role="tab" aria-controls="v-pills-template">
+            <a class="btn btn-outline-secondary nav-btn" id="template-tab" type="button">
                 <img src="/static/assets/svg-vector/template_kanban.svg" alt="template-kanban-icon">Template
             </a>
         </div>
@@ -524,33 +611,24 @@
 
                                 <div class="accordion-body">
                                     <div class="nav flex-column nav-pills me-3" id="v-pills-tab" role="tablist">
-                                        <a class="btn btn-outline-secondary" id="v-pills-workspaceBoard-tab"
-                                           data-bs-toggle="pill" type="button"
-                                           data-bs-target="#v-pills-workspaceBoard{{ workspace.workspace_id }}"
-                                           role="tab" aria-controls="v-pills-workspaceBoard" aria-selected="false">
+                                        <a class="btn btn-outline-secondary nav-btn" type="button"
+                                           id="workspaceBoard-tab{{ workspace.workspace_id }}">
                                             <img src="/static/assets/svg-vector/board_kanban.svg"
                                                  alt="board-kanban-icon">
                                             Boards
                                         </a>
-                                        <a class="btn btn-outline-secondary" id="v-pills-favBoard-tab"
-                                           data-bs-toggle="pill"
-                                           data-bs-target="#v-pills-favBoard{{ workspace.workspace_id }}" type="button"
-                                           role="tab" aria-controls="v-pills-favBoard" aria-selected="false">
+                                        <a class="btn btn-outline-secondary nav-btn" type="button"
+                                           id="favBoard-tab{{ workspace.workspace_id }}">
                                             <img src="/static/assets/svg-vector/favorite.svg" alt="favorite-icon">
                                             Favorite
                                         </a>
-                                        <a class="btn btn-outline-secondary" id="v-pills-workspaceMember-tab"
-                                           data-bs-toggle="pill" type="button" disabled="true"
-                                           data-bs-target="#v-pills-workspaceMember{{ workspace.workspace_id }}"
-                                           role="tab" aria-controls="v-pills-workspaceMember" aria-selected="false">
+                                        <a class="btn btn-outline-secondary nav-btn disabled" type="button"
+                                           id="workspaceMember-tab{{ workspace.workspace_id }}">
                                             <img src="/static/assets/svg-vector/many_user.svg" alt="members-icon">
                                             Members
                                         </a>
-                                        <a class="btn btn-outline-secondary" id="v-pills-workspaceSetting-tab"
-                                           data-bs-toggle="pill"
-                                           data-bs-target="#v-pills-workspaceSetting{{ workspace.workspace_id }}"
-                                           type="button"
-                                           role="tab" aria-controls="v-pills-workspaceSetting" aria-selected="false">
+                                        <a class="btn btn-outline-secondary nav-btn" type="button"
+                                           id="workspaceSetting-tab{{ workspace.workspace_id }}">
                                             <img src="/static/assets/svg-vector/setting.svg" alt="setting-icon">
                                             Settings
                                         </a>
@@ -570,25 +648,25 @@
     <section id="main-content">
         <div class="tab-content" id="v-pills-tabContent">
 
-            <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-template" role="tabpanel" aria-labelledby="v-pills-template-tab">
+            <div class="tab-div px-lg-4 px-sm-3 px-3 hide-toggle" id="template-tab">
                 <div class="template-tab">
                     <div class="template">
-                        <h3><img class="template-icon-img" src="/static/assets/svg-vector/template_kanban.svg" alt="template-kanban-icon">
-                            Templates
+                        <h3><img class="template-icon-img" src="/static/assets/svg-vector/template_kanban.svg"
+                                 alt="template-kanban-icon">Templates
                         </h3>
                         <hr>
                         <div class="free-templates-parent">
                             {% for board in all_templates %}
                                 {% if board.is_template %}
                                     {% if user.id != 1 %}
-                                        <a href="{{ url_for('board', board_id=board.board_id) }}">
-                                            <div class="board-tile">
+                                        <div class="board-tile">
+                                            <a href="{{ url_for('board', board_id=board.board_id) }}">
                                                 <img class="board-tile-bg" src="{{ board.board_background_image }}"
                                                      alt="">
-                                                <p>{{ board.board_name }}</p>
+                                                <p class="board-name-text">{{ board.board_name }}</p>
                                                 <span class="template-text">Template</span>
-                                            </div>
-                                        </a>
+                                            </a>
+                                        </div>
                                     {% else %}
                                         <div class="board-tile">
                                             <a href="{{ url_for('board', board_id=board.board_id) }}">
@@ -624,7 +702,7 @@
                                     {% endif %}
                                 {% endif %}
                             {% endfor %}
-                            {% if user.id == 1 %}
+                            {% if user.id == 1 and all_templates|length <= 16 %}
                                 <div class="board-tile-empty">
                                     <a href="" data-bs-toggle="modal" data-bs-target="#create-template-modal">
                                         <p>Create new template</p></a>
@@ -634,14 +712,13 @@
                     </div>
                 </div>
 
-
             </div>
 
             {% for workspace in all_workspaces %}
                 {% if workspace.workspace_id != 1 %}
 
-                    <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-workspaceBoard{{ workspace.workspace_id }}" role="tabpanel"
-                         aria-labelledby="v-pills-workspaceBoard-tab">
+                    <div class="tab-div px-lg-4 px-sm-3 px-3 hide-toggle"
+                         id="workspaceBoard-tab{{ workspace.workspace_id }}">
                         <div class="one-workspace">
                             {#                <h3>YOUR WORKSPACES</h3>#}
                             <div class="mb-5">
@@ -700,8 +777,7 @@
                         </div>
                     </div>
 
-                    <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-favBoard{{ workspace.workspace_id }}" role="tabpanel"
-                         aria-labelledby="v-pills-favBoard-tab">
+                    <div class="tab-div px-lg-4 px-sm-3 px-3 hide-toggle" id="favBoard-tab{{ workspace.workspace_id }}">
                         <div class="one-workspace">
                             <div class="mb-5">
                                 <h4>
@@ -717,7 +793,7 @@
                                                 <a href="{{ url_for('board', board_id=board.board_id) }}">
                                                     <img class="board-tile-bg" src="{{ board.board_background_image }}"
                                                          alt="">
-                                                    <p>{{ board.board_name }}</p>
+                                                    <p class="board-name-text">{{ board.board_name }}</p>
                                                 </a>
                                             </div>
                                         {% endif %}
@@ -729,13 +805,13 @@
 
                         </div>
                     </div>
-                    <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-workspaceMember{{ workspace.workspace_id }}" role="tabpanel"
-                         aria-labelledby="v-pills-workspaceMember-tab">
+                    <div class="tab-div px-lg-4 px-sm-3 px-3 hide-toggle"
+                         id="workspaceMember-tab{{ workspace.workspace_id }}">
                         members{{ workspace.workspace_id }}
                     </div>
-                    <div class="tab-pane fade p-lg-4 p-sm-3 p-3" id="v-pills-workspaceSetting{{ workspace.workspace_id }}" role="tabpanel"
-                         aria-labelledby="v-pills-workspaceSetting-tab">
-                        <div style="margin:100px 50px;" class="mb-5">
+                    <div class="tab-div px-lg-4 px-sm-3 px-3 hide-toggle"
+                         id="workspaceSetting-tab{{ workspace.workspace_id }}">
+                        <div class="mb-5">
                             <h4 class="workspace-name-setting">
                                 <div style="background: {{ workspace.workspace_logo_color }}"
                                      class="workspace-logo-main">{{ workspace.workspace_name[0].title() }}</div>
@@ -784,61 +860,58 @@
                                 <img class="setting-icon" src="/static/assets/svg-vector/setting.svg" alt="">
                                 Workspace Settings
                             </div>
-                            <a role="button" data-bs-toggle="modal"
-                               data-bs-target="#delete-workspace-modal{{ workspace.workspace_id }}"
-                               style="color: #dc3545;">Delete this Workspace?</a>
 
-                            <div class="modal edit-workspace" id="delete-workspace-modal{{ workspace.workspace_id }}"
-                                 tabindex="-1"
-                                 aria-labelledby="staticBackdropLabel" aria-hidden="true">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header">
-                                            <h5 class="modal-title" id="staticBackdropLabel">Delete Workspace?</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                                    aria-label="Close"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <ul style="list-style: none; padding: 0; margin: 0;">
+                            <div class="dropdown">
 
-                                                <li>
-                                                    <div class="mb-3">
-                                                        <p class="create-board-backgrounds">Enter the Workspace name
-                                                            "{{ workspace.workspace_name }}" to delete</p>
-                                                    </div>
-                                                </li>
-                                                <li><p>Things to know:</p></li>
-                                                <li>
-                                                    <div class="mb-3">
-                                                        <ul style="list-style: disc;">
-                                                            <li>This is permanent and can't be undone.</li>
-                                                            <li>All boards in this Workspace will be deleted.</li>
-                                                        </ul>
-                                                    </div>
-                                                </li>
-                                                <li>
-                                                    <form action="{{ url_for('boards_manager') }}" method="post"
-                                                          enctype="multipart/form-data">
-                                                        <input type="hidden" name="Workspace_Id"
-                                                               value="{{ workspace.workspace_id }}">
-                                                        <div class="mb-3">
-                                                            <label for="delete-workspace-name" class="form-label">
-                                                                Enter the Workspace name to delete</label>
+                                <a role="button" id="dropdownMenu" data-bs-toggle="dropdown" type="button"
+                                   aria-expanded="false" data-bs-target="#delete-workspace{{ workspace.workspace_id }}"
+                                   style="color: #dc3545;">Delete this Workspace?
+                                </a>
 
-                                                            <input name="Workspace_Name" required maxlength="20"
-                                                                   type="text"
-                                                                   class="form-control" id="delete-workspace-name">
-                                                        </div>
-                                                        <button id="delete-workspace-btn" class="btn btn-danger"
-                                                                name="delete_workspace" disabled>Delete Workspace
-                                                        </button>
-                                                    </form>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
+                                <div class="shadow mb-2 bg-white rounded dropdown-menu del-brd-drp"
+                                     aria-labelledby="dropdownMenu"
+                                     id="delete-workspace{{ workspace.workspace_id }}">
+
+                                    <ul style="list-style: none; padding: 0; margin: 0;">
+
+                                        <li>
+                                            <div class="mb-3">
+                                                <p class="create-board-backgrounds">Enter the Workspace name
+                                                    "{{ workspace.workspace_name }}" to delete</p>
+                                            </div>
+                                        </li>
+                                        <li><p>Things to know:</p></li>
+                                        <li>
+                                            <div class="mb-3">
+                                                <ul style="list-style: disc;">
+                                                    <li>This is permanent and can't be undone.</li>
+                                                    <li>All boards in this Workspace will be deleted.</li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <form action="{{ url_for('boards_manager') }}" method="post"
+                                                  enctype="multipart/form-data">
+                                                <input type="hidden" name="Workspace_ID"
+                                                       value="{{ workspace.workspace_id }}">
+                                                <div class="mb-3">
+                                                    <label for="delete-workspace-name" class="form-label">
+                                                        Enter the Workspace name to delete</label>
+
+                                                    <input name="Workspace_Name" required maxlength="20"
+                                                           type="text" class="form-control" id="delete-workspace-name">
+                                                </div>
+                                                <button id="delete-workspace-btn" class="btn btn-danger"
+                                                        name="delete_workspace" disabled>Delete Workspace
+                                                </button>
+                                            </form>
+                                        </li>
+                                    </ul>
+
                                 </div>
                             </div>
+
+
                             <script>
                                 let input = document.getElementById('delete-workspace-name');
                                 let delBtn = document.getElementById("delete-workspace-btn");
@@ -863,11 +936,11 @@
 
             {# 4 boards of each workspace including recent and templates #}
 
-            <div class="boards tab-pane fade show active p-lg-4 p-sm-3 p-3" id="v-pills-allBoards" role="tabpanel"
-                 aria-labelledby="v-pills-allBoards-tab">
+            <div class="boards tab-div px-lg-4 px-sm-3 px-3" id="allBoards-tab">
                 <div class="template">
 
-                    <h3><img class="template-icon-img" src="/static/assets/svg-vector/template_kanban.svg" alt="template-kanban-icon">
+                    <h3><img class="template-icon-img" src="/static/assets/svg-vector/template_kanban.svg"
+                             alt="template-kanban-icon">
                         Popular templates
                     </h3>
                     <div class="your-boards-parent">
@@ -894,7 +967,7 @@
                                     <div class="dropdown">
                                         <img type="button" class="delete-board-icon" id="dropdownMenu"
                                              data-bs-toggle="dropdown" aria-expanded="false"
-                                             data-bs-target="#delete-board"
+                                             data-bs-target="#ldelete-board"
                                              src="/static/assets/svg-vector/delete-icon.svg" alt="">
 
                                         <div class="dropdown-menu" aria-labelledby="dropdownMenu"
@@ -1105,7 +1178,7 @@
 
                             <div class="mb-2">
                                 <label for="exampleInputEmail" class="form-label">Board title</label>
-                                <input required maxlength="20" type="text" name="Board_Name" class="form-control"
+                                <input required maxlength="11" type="text" name="Board_Name" class="form-control"
                                        id="exampleInputEmail" placeholder="Board name">
                             </div>
 
@@ -1199,7 +1272,7 @@
 
                             <div class="mb-2">
                                 <label for="templateName" class="form-label">Template title</label>
-                                <input required maxlength="20" type="text" name="Template_Name" class="form-control"
+                                <input required maxlength="11" type="text" name="Template_Name" class="form-control"
                                        id="templateName" placeholder="Template name">
                             </div>
 
@@ -1216,6 +1289,52 @@
         </div>
     </div>
 </div>
+
+<script>
+    window.addEventListener('resize', function () {
+        let s = document.getElementById('sidePanelOffcanvas');
+        if (screen.width > 626 && s.style.visibility === 'visible') {
+            s.style.visibility = 'hidden';
+        }
+    });
+
+</script>
+
+<script>
+    function aF() {
+        let s = document.getElementById('sidePanelOffcanvas');
+        if (s.style.visibility === 'visible') {
+            s.style.visibility = 'hidden';
+        } else {
+            s.style.visibility = 'visible';
+        }
+    }
+</script>
+
+<script>
+    const navItems = document.querySelectorAll('.nav-btn');
+    const navDivs = document.querySelectorAll('.tab-div');
+    {#const settings = document.getElementById('settings')#}
+
+    for (let item of navItems) {
+        item.addEventListener('click', (event) => {
+            for (let item of navItems) {
+                item.classList.remove('active');
+            }
+            for (let div of navDivs) {
+                div.classList.add('hide-toggle');
+            }
+            event.target.classList.add('active');
+            for (let div_ of navDivs) {
+                if (event.target.id === div_.id) {
+                    div_.classList.remove('hide-toggle');
+                }
+            }
+
+        });
+    }
+
+</script>
 
 
 <script>

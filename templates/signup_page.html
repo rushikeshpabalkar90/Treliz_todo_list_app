@@ -28,29 +28,29 @@
 
             <div class="mb-3">
                 <label for="exampleInputName" class="form-label">Name</label>
-                <input required type="text" name="Name" class="form-control" id="exampleInputName"
+                <input required maxlength="200" type="text" name="Name" class="form-control" id="exampleInputName"
                        placeholder="Enter your name">
             </div>
 
             <div class="mb-3">
                 <label for="exampleInputEmail" class="form-label">Email</label>
-                <input pattern="[a-z0-9._+]+@[a-z0-9 -]+\.[a-z]{2,}" title="Enter a valid email." required type="email"
-                       name="Email" value="{{ email }}" class="form-control" id="exampleInputEmail"
+                <input pattern="[a-z0-9._+]+@[a-z0-9 -]+\.[a-z]{2,}" maxlength="100" title="Enter a valid email."
+                       required type="email" name="Email" value="{{ email }}" class="form-control" id="exampleInputEmail"
                        placeholder="Enter your email">
             </div>
 
             <div class="mb-3">
                 <label for="exampleInputPassword" class="form-label">Create Password</label>
-                <input title="Enter at least 8 character long password." pattern="[a-zA-Z0-9 ]{8,}" required
+                <input title="Enter at least 8 character long password." minlength="8" maxlength="50" required
                        type="password" name="Password" class="form-control" id="exampleInputPassword"
                        placeholder="Create a strong password">
-                <p style="font-size: 12px">Must be at least 8 characters long.</p>
+                <p class="mt-1" style="font-size: 12px">Must be at least 8 characters long.</p>
             </div>
 
             <div class="mb-3">
                 <label for="exampleInputRePassword" class="form-label">Confirm Password</label>
-                <input required type="password" name="Re-Password" class="form-control" id="exampleInputRePassword"
-                       placeholder="Re-enter password">
+                <input required minlength="8" maxlength="50" type="password" name="Re-Password" class="form-control"
+                       id="exampleInputRePassword" placeholder="Re-enter password">
             </div>
 
             <p class="term-cond-signup">By signing up, I accept the Treliz <a href="#">Terms and Condition</a> and
