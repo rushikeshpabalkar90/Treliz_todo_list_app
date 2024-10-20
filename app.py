@@ -24,6 +24,7 @@ import random
 from datetime import datetime
 
 all_colors = os.listdir('static/assets/images/board_background_img/bg_colors/')
+
 all_images = []
 
 Access_key = os.environ['UNSPLASH_ACCESS_KEY']
@@ -69,9 +70,6 @@ app.config['CKEDITOR_SERVE_LOCAL'] = True
 app.config['CKEDITOR_PKG_TYPE'] = 'basic'
 ckeditor = CKEditor(app)
 
-# postgresql://{user-name}:{password}@{host}:{port-id}/{database-name}
-# postgresql://postgres:1234@localhost:5432/postgres
-# Secret key for flashes messages
 app.config['SECRET_KEY'] = os.environ['SECRET_KEY']
 app.config['SQLALCHEMY_DATABASE_URI'] = os.environ['DATABASE_URL']
 app.config['SQLALCHEMY_TRACK_MODIFICATION'] = False
@@ -80,22 +78,20 @@ db = SQLAlchemy(app)
 # global variable for directory to upload files
 app.config['CARD_ATTACHMENTS'] = 'static/all_uploads/card_attachments/'
 app.config['CARD_COVER_IMAGE'] = 'static/all_uploads/card_cover_image/'
-# we should use MAX_CONTENT_LENGTH
 app.config['MAX_CONTENT_LENGTH'] = 8 * 1024 * 1024  # 8 Megabytes
 app.config['ALLOWED_EXTENSIONS_COVER_IMG'] = ['.jpg', '.jpeg', '.png', '.gif']
 app.config['ALLOWED_EXTENSIONS_CARD_ATTACHMENT'] = ['.jpg', '.jpeg', '.png', '.gif', '.docx', '.pdf', '.html', '.txt']
 
 login_manager = LoginManager()
 login_manager.init_app(app)
-app.app_context().push()
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.query.get(user_id)
 
 
-# Databases
+# --------------------------------------- Databases ----------------------------------------- #
 
 class User(UserMixin, db.Model):
     __tablename__ = "users"
@@ -232,10 +228,12 @@ class ChecklistItem(db.Model):
         return f'<ChecklistItem {self.item_name}>'
 
 
-db.create_all()
+with app.app_context():
+    db.create_all()
 
 
-# decorator function
+# --------------------------------------- Admin Decorator function ----------------------------------------- #
+
 def admin_only(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -246,21 +244,25 @@ def admin_only(f):
     return decorated_function
 
 
+# --------------------------------------- Otp generator ----------------------------------------- #
+
+
 def generate_otp():
-    # letters_low = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't',
-    #                'u', 'v', 'w', 'x', 'y', 'z']
     numbers = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']
 
-    # letters_up = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
-    #               'U', 'V', 'W', 'X', 'Y', 'Z']
+    letters_up = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+                  'U', 'V', 'W', 'X', 'Y', 'Z']
 
-    # up_letters_list = [random.choice(letters_low) for _ in range(2)]
-    # low_letters_list = [random.choice(letters_up) for _ in range(2)]
-    numbers_list = [random.choice(numbers) for _ in range(6)]
+    up_letters_list = [random.choice(letters_up) for _ in range(2)]
+    numbers_list = [random.choice(numbers) for _ in range(4)]
 
-    # otp_letters = up_letters_list + numbers_list + low_letters_list
-    otp_email = "".join(numbers_list)
+    otp_letters = up_letters_list + numbers_list
+    random.shuffle(otp_letters)
+    otp_email = "".join(otp_letters)
     return otp_email
+
+
+# --------------------------------------- SMTP email sender ----------------------------------------- #
 
 
 def send_otp(email):
@@ -290,15 +292,270 @@ def send_otp(email):
     session.quit()
 
 
+# --------------------------------------- Strip data function ----------------------------------------- #
+
+
 def strip_form_data(form):
     lst = {}
-    # key: value.strip() for (key, value) in form.items()
+
     for (key, value) in form.items():
         try:
             lst[key] = value.strip()
         except AttributeError:
             lst[key] = value
     return lst
+
+
+# --------------------------------------- Copy Board Row ----------------------------------------- #
+
+
+def copy_board(id_, board_name, workspace_id, background):
+    s = db.session
+    board_ = s.query(Board).get(id_)
+    list_ = None
+    card_ = None
+    ls = None
+    c = None
+    mc1 = None
+    mc2 = None
+
+    for i in range(len(board_.board_lists)):
+        if board_.board_lists:
+            ls = board_.board_lists[i]
+
+            list_ = s.query(List).get(ls.list_id)
+
+            for j in range(len(list_.list_cards)):
+                if list_.list_cards:
+                    c = list_.list_cards[j]
+
+                    card_ = s.query(Card).get(c.card_id)
+
+                    for k in range(len(card_.card_attachments)):
+                        if card_.card_attachments:
+                            mc1 = card_.card_attachments[k]
+
+                            s.expunge(mc1)
+                            make_transient(mc1)
+                            mc1.attachment_id = None
+
+                    for n in range(len(card_.card_checklist_items)):
+                        if card_.card_checklist_items:
+                            mc2 = card_.card_checklist_items[n]
+
+                            s.expunge(mc2)
+                            make_transient(mc2)
+                            mc2.item_id = None
+
+                    s.expunge(c)
+                    make_transient(c)
+                    c.card_id = None
+
+            s.expunge(ls)
+            make_transient(ls)
+            ls.list_id = None
+
+    s.expunge(board_)
+    board_.board_id = None
+    board_.board_name = board_name
+    board_.parent_workspace_id = workspace_id
+    board_.board_background = background
+    board_.board_added_date = datetime.now()
+    board_.recent_open_time = datetime.now()
+    board_.is_template = False
+    board_.creator_id = current_user.id
+
+    make_transient(board_)
+    s.add(board_)
+    s.commit()
+
+    if ls:
+        assert board_.board_id
+        ls.board_id = board_.board_id
+        s.add(ls)
+        s.commit()
+
+    if c:
+        assert list_.list_id
+        c.list_id = list_.list_id
+        s.add(c)
+        s.commit()
+
+    if mc1:
+        assert card_.card_id
+        mc1.attachment_id = card_.card_id
+        s.add(mc1)
+        s.commit()
+
+    if mc2:
+        assert card_.card_id
+        mc2.checklist_id = card_.card_id
+        s.add(mc2)
+        s.commit()
+
+
+# --------------------------------------- Copy List Row ----------------------------------------- #
+
+
+def clone_list(id_, updated_name):
+    s = db.session
+    agent = s.query(List).get(id_)
+    child = None
+    c = None
+    mc1 = None
+    mc2 = None
+
+    for i in range(len(agent.list_cards)):
+        if agent.list_cards:
+            c = agent.list_cards[i]
+
+            child = s.query(Card).get(c.card_id)
+
+            for j in range(len(child.card_attachments)):
+                if child.card_attachments:
+                    mc1 = child.card_attachments[j]
+                    # db.session.expunge does
+                    s.expunge(mc1)
+
+                    make_transient(mc1)
+                    mc1.attachment_id = None
+
+            for k in range(len(child.card_checklist_items)):
+                if child.card_checklist_items:
+                    mc2 = child.card_checklist_items[k]
+                    # db.session.expunge does
+                    s.expunge(mc2)
+
+                    make_transient(mc2)
+                    mc2.item_id = None
+
+            # db.session.expunge does
+            s.expunge(c)
+            make_transient(c)
+            c.card_id = None
+
+    s.expunge(agent)
+    agent.list_id = None
+    agent.list_name = updated_name
+    agent.list_position = agent.list_position + 1
+
+    make_transient(agent)
+    s.add(agent)
+    s.commit()
+
+    if c:
+        assert agent.list_id
+        c.agent_id = agent.list_id
+        s.add(c)
+        s.commit()
+
+    if mc1:
+        assert child.card_id
+        mc1.child_id = child.card_id
+        s.add(mc1)
+        s.commit()
+
+    if mc2:
+        assert child.card_id
+        mc2.child_id = child.card_id
+        s.add(mc2)
+        s.commit()
+
+
+# --------------------------------------- Copy Card Row ----------------------------------------- #
+
+
+def clone_card(card_id, updated_name, updated_position, updated_parent_id):
+    s = db.session
+    agent = s.query(Card).get(card_id)
+    c1 = None
+    c2 = None
+
+    # card_checklist_items
+    for i in range(len(agent.card_attachments)):
+        if agent.card_attachments:
+            c1 = agent.card_attachments[i]
+            s.expunge(c1)
+            make_transient(c1)
+            c1.attachment_id = None
+
+    for i in range(len(agent.card_checklist_items)):
+        if agent.card_checklist_items:
+            c2 = agent.card_checklist_items[i]
+            s.expunge(c2)
+            make_transient(c2)
+            c2.item_id = None
+
+    s.expunge(agent)
+    agent.card_id = None
+    agent.card_name = updated_name
+    agent.card_position = updated_position
+    agent.parent_list_id = updated_parent_id
+
+    make_transient(agent)
+
+    s.add(agent)
+    s.commit()
+
+    if c1:
+        assert agent.card_id
+        c1.agent_id = agent.card_id
+        s.add(c1)
+        s.commit()
+
+    if c2:
+        assert agent.card_id
+        c2.agent_id = agent.card_id
+        s.add(c2)
+        s.commit()
+
+
+# --------------------------------------- Move List Position ----------------------------------------- #
+
+
+def increase_or_decrease_position(current_position, destination_position, parent_id):
+    if current_position < destination_position:
+        # increase position
+        for i in range(int(current_position) + 1,
+                       int(destination_position) + 1):
+            list_to_edit = List.query.filter_by(list_position=i, parent_board_id=parent_id).first()
+            list_to_edit.list_position = i - 1
+            db.session.commit()
+
+    elif current_position > destination_position:
+        # decrease position
+        for i in range(-(int(current_position) - 1),
+                       -(int(destination_position) - 1)):
+            # 4, 3, 2
+            i *= -1
+            list_to_edit = List.query.filter_by(list_position=i, parent_board_id=parent_id).first()
+            list_to_edit.list_position = i + 1
+            db.session.commit()
+
+
+# --------------------------------------- Increase Card Position ----------------------------------------- #
+
+
+def move_cards_down(from_position, to_position, parent_list_id):
+    for i in range(from_position, to_position):
+        i *= -1
+        card_to_edit = Card.query.filter_by(card_position=i, parent_list_id=parent_list_id).first()
+        card_to_edit.card_position = i + 1
+        db.session.commit()
+
+
+# --------------------------------------- Decrease Card Position ----------------------------------------- #
+
+
+def move_cards_up(from_position, to_position, parent_list_id):
+    for i in range(from_position, to_position):
+        card_to_edit = Card.query.filter_by(card_position=i, parent_list_id=parent_list_id).first()
+
+        card_to_edit.card_position = i - 1
+        db.session.commit()
+
+
+# --------------------------------------- Routes ----------------------------------------- #
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -526,237 +783,6 @@ def boards_manager():
                            all_templates=all_templates)
 
 
-def copy_board(id_, board_name, workspace_id, background):
-    s = db.session
-    board_ = s.query(Board).get(id_)
-    list_ = None
-    card_ = None
-    ls = None
-    c = None
-    mc1 = None
-    mc2 = None
-
-    for i in range(len(board_.board_lists)):
-        if board_.board_lists:
-            ls = board_.board_lists[i]
-
-            list_ = s.query(List).get(ls.list_id)
-
-            for j in range(len(list_.list_cards)):
-                if list_.list_cards:
-                    c = list_.list_cards[j]
-
-                    card_ = s.query(Card).get(c.card_id)
-
-                    for k in range(len(card_.card_attachments)):
-                        if card_.card_attachments:
-                            mc1 = card_.card_attachments[k]
-
-                            s.expunge(mc1)
-                            make_transient(mc1)
-                            mc1.attachment_id = None
-
-                    for n in range(len(card_.card_checklist_items)):
-                        if card_.card_checklist_items:
-                            mc2 = card_.card_checklist_items[n]
-
-                            s.expunge(mc2)
-                            make_transient(mc2)
-                            mc2.item_id = None
-
-                    s.expunge(c)
-                    make_transient(c)
-                    c.card_id = None
-
-            s.expunge(ls)
-            make_transient(ls)
-            ls.list_id = None
-
-    s.expunge(board_)
-    board_.board_id = None
-    board_.board_name = board_name
-    board_.parent_workspace_id = workspace_id
-    board_.board_background = background
-    board_.board_added_date = datetime.now()
-    board_.recent_open_time = datetime.now()
-    board_.is_template = False
-    board_.creator_id = current_user.id
-
-    make_transient(board_)
-    s.add(board_)
-    s.commit()
-
-    if ls:
-        assert board_.board_id
-        ls.board_id = board_.board_id
-        s.add(ls)
-        s.commit()
-
-    if c:
-        assert list_.list_id
-        c.list_id = list_.list_id
-        s.add(c)
-        s.commit()
-
-    if mc1:
-        assert card_.card_id
-        mc1.attachment_id = card_.card_id
-        s.add(mc1)
-        s.commit()
-
-    if mc2:
-        assert card_.card_id
-        mc2.checklist_id = card_.card_id
-        s.add(mc2)
-        s.commit()
-
-
-def clone_agent(id_, updated_name):
-    s = db.session
-    agent = s.query(List).get(id_)
-    child = None
-    c = None
-    mc1 = None
-    mc2 = None
-
-    for i in range(len(agent.list_cards)):
-        if agent.list_cards:
-            c = agent.list_cards[i]
-
-            child = s.query(Card).get(c.card_id)
-
-            for j in range(len(child.card_attachments)):
-                if child.card_attachments:
-                    mc1 = child.card_attachments[j]
-                    # db.session.expunge does
-                    s.expunge(mc1)
-
-                    make_transient(mc1)
-                    mc1.attachment_id = None
-
-            for k in range(len(child.card_checklist_items)):
-                if child.card_checklist_items:
-                    mc2 = child.card_checklist_items[k]
-                    # db.session.expunge does
-                    s.expunge(mc2)
-
-                    make_transient(mc2)
-                    mc2.item_id = None
-
-            # db.session.expunge does
-            s.expunge(c)
-            make_transient(c)
-            c.card_id = None
-
-    s.expunge(agent)
-    agent.list_id = None
-    agent.list_name = updated_name
-    agent.list_position = agent.list_position + 1
-
-    make_transient(agent)
-    s.add(agent)
-    s.commit()
-
-    if c:
-        assert agent.list_id
-        c.agent_id = agent.list_id
-        s.add(c)
-        s.commit()
-
-    if mc1:
-        assert child.card_id
-        mc1.child_id = child.card_id
-        s.add(mc1)
-        s.commit()
-
-    if mc2:
-        assert child.card_id
-        mc2.child_id = child.card_id
-        s.add(mc2)
-        s.commit()
-
-
-def clone_card(card_id, updated_name, updated_position, updated_parent_id):
-    s = db.session
-    agent = s.query(Card).get(card_id)
-    c1 = None
-    c2 = None
-
-    # card_checklist_items
-    for i in range(len(agent.card_attachments)):
-        if agent.card_attachments:
-            c1 = agent.card_attachments[i]
-            s.expunge(c1)
-            make_transient(c1)
-            c1.attachment_id = None
-
-    for i in range(len(agent.card_checklist_items)):
-        if agent.card_checklist_items:
-            c2 = agent.card_checklist_items[i]
-            s.expunge(c2)
-            make_transient(c2)
-            c2.item_id = None
-
-    s.expunge(agent)
-    agent.card_id = None
-    agent.card_name = updated_name
-    agent.card_position = updated_position
-    agent.parent_list_id = updated_parent_id
-
-    make_transient(agent)
-
-    s.add(agent)
-    s.commit()
-
-    if c1:
-        assert agent.card_id
-        c1.agent_id = agent.card_id
-        s.add(c1)
-        s.commit()
-
-    if c2:
-        assert agent.card_id
-        c2.agent_id = agent.card_id
-        s.add(c2)
-        s.commit()
-
-
-def increase_or_decrease_position(current_position, destination_position, parent_id):
-    if current_position < destination_position:
-        # increase position
-        for i in range(int(current_position) + 1,
-                       int(destination_position) + 1):
-            list_to_edit = List.query.filter_by(list_position=i, parent_board_id=parent_id).first()
-            list_to_edit.list_position = i - 1
-            db.session.commit()
-
-    elif current_position > destination_position:
-        # decrease position
-        for i in range(-(int(current_position) - 1),
-                       -(int(destination_position) - 1)):
-            # 4, 3, 2
-            i *= -1
-            list_to_edit = List.query.filter_by(list_position=i, parent_board_id=parent_id).first()
-            list_to_edit.list_position = i + 1
-            db.session.commit()
-
-
-def move_cards_down(from_position, to_position, parent_list_id):
-    for i in range(from_position, to_position):
-        i *= -1
-        card_to_edit = Card.query.filter_by(card_position=i, parent_list_id=parent_list_id).first()
-        card_to_edit.card_position = i + 1
-        db.session.commit()
-
-
-def move_cards_up(from_position, to_position, parent_list_id):
-    for i in range(from_position, to_position):
-        card_to_edit = Card.query.filter_by(card_position=i, parent_list_id=parent_list_id).first()
-
-        card_to_edit.card_position = i - 1
-        db.session.commit()
-
-
 @app.route('/board/<int:board_id>', methods=["POST", "GET"])
 @login_required
 def board(board_id):
@@ -857,8 +883,7 @@ def board(board_id):
 
                 all_lists_in_board = Board.query.filter_by(parent_board_id=request.form['Dest_Board_Move_List'])
                 if all_lists_in_board.count() < 10:
-                    # get the current list position and board_id and change its position to destination and board id to
-                    # destination board in destination board increase all position greater than destination position by one.
+
                     current_list = List.query.filter_by(list_position=request.form['Current_List_Position'],
                                                         parent_board_id=board_id).first()
 
@@ -910,7 +935,7 @@ def board(board_id):
                         list_to_edit.list_position = i + 1
                         db.session.commit()
 
-                    clone_agent(list_to_copy.list_id, form_data['List_Name_Copy'])
+                    clone_list(list_to_copy.list_id, form_data['List_Name_Copy'])
 
         if 'delete_list_form' in request.form:
 
@@ -1347,6 +1372,8 @@ def card(id_, card_id):
                            completed_task_perc=completed_task_perc, user=current_user)
 
 
+# --------------------------------------- Catch error 413 ----------------------------------------- #
+
 @app.errorhandler(413)
 def request_entity_too_large(error):
     return f'<h2 style="color: red;">File is bigger than 8Mb upload limit.<h2>\n{error}'
@@ -1354,7 +1381,3 @@ def request_entity_too_large(error):
 
 if __name__ == '__main__':
     app.run(debug=True)
-
-# secure_filename changes file name like replace spaces with _ .
-# file.save(f"all_uploads/{secure_filename(file.filename)}")
-# joining upload path and upload filename
